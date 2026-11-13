@@ -515,3 +515,12 @@ html { scroll-padding-top: 96px; scroll-padding-bottom: 190px; }
 .ev-group-row { display: flex; align-items: center; gap: 12px; min-height: 52px; text-align: left; font-weight: 600; width: 100%; }
 .ev-group-row span:nth-child(2) { flex: 1; }
 .ev-group-row .icon { color: var(--ink-2); }
+
+/* ---------- Продажи ---------- */
+.sale-total { display: flex; justify-content: space-between; align-items: baseline; padding: 0 4px; }
+.sale-total span { font-weight: 600; color: var(--ink-2); }
+.sale-total b { font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.sale-card, .sale-sum { display: flex; flex-direction: column; gap: 14px; }
+.sale-big { display: flex; flex-direction: column; gap: 2px; padding-bottom: 12px; border-bottom: 2px dashed var(--soft); }
+.sale-big b { font-size: 40px; font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.sale-big span { font-size: 18px; font-weight: 600; color: var(--ink-2); }

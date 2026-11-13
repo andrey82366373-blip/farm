@@ -34,12 +34,12 @@ export function EventChooser() {
 }
 
 /* ---------- Общий шаг: выбрать животных ---------- */
-function useIdsFromQuery() {
+export function useIdsFromQuery() {
   const { query } = useRoute();
   return useMemo(() => new Set((query.ids || '').split(',').map(Number).filter(Boolean)), [query.ids]);
 }
 
-function PickStep({ title, animals, selected, setSelected, onNext, hint }) {
+export function PickStep({ title, animals, selected, setSelected, onNext, hint }) {
   return (
     <Screen
       title={title}

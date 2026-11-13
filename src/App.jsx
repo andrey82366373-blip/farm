@@ -9,6 +9,7 @@ import AnimalForm from './screens/AnimalForm.jsx';
 import Birth from './screens/Birth.jsx';
 import Journal from './screens/Journal.jsx';
 import Stats from './screens/Stats.jsx';
+import { Sales, SaleNew, SaleView } from './screens/Sales.jsx';
 import { EventChooser, OutForm, VetForm, PurchaseForm } from './screens/EventForms.jsx';
 
 const TABS = [
@@ -55,6 +56,8 @@ function route(r) {
     case 'birth': return <Birth />;
     case 'journal': return <Journal />;
     case 'stats': return <Stats />;
+    case 'sales': return <Sales />;
+    case 'sale': return b === 'new' ? <SaleNew /> : <SaleView id={Number(b)} />;
     case 'event':
       if (b === 'death' || b === 'slaughter') return <OutForm type={b} />;
       if (b === 'vet') return <VetForm />;
