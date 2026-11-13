@@ -376,7 +376,7 @@ html { scroll-padding-top: 96px; scroll-padding-bottom: 190px; }
 .big-num { font-size: 44px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
 .pill-note { font-size: 16px; color: var(--ink-2); }
 .divider { height: 0; border-top: 2px dashed var(--soft); }
-.fade-in { animation: fadein .25s ease both; }
+.fade-in { animation: fadein .25s ease; }
 @keyframes fadein { from { opacity: 0; } }
 
 /* ---------- Взросление ---------- */
@@ -386,14 +386,14 @@ html { scroll-padding-top: 96px; scroll-padding-bottom: 190px; }
 .mat-btns .btn { flex: 1; }
 
 .hero-small { padding-bottom: 56px; margin-bottom: -40px; }
-.hero-small::before { width: 40px; height: 40px; }
+.hero-small::before { display: none; }
 .hero-small h1 { margin: 0; }
 .row-ico { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: var(--green-tint); color: var(--green-dark); border: 2px solid var(--ink); flex: none; }
 .row-ico .icon { width: 28px; height: 28px; }
 .install, .welcome { display: flex; flex-direction: column; gap: 12px; }
 .welcome h2 { font-size: 26px; }
 .welcome p { color: var(--ink-2); }
-.hero-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-right: 76px; }
+.hero-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .hero-row .btn { margin-bottom: 0; }
 .photo-preview { width: 100%; max-height: 320px; object-fit: cover; border-radius: var(--r); border: var(--bw) solid var(--ink); }
 
@@ -558,3 +558,13 @@ html { scroll-padding-top: 96px; scroll-padding-bottom: 190px; }
 .count-dot.ok { background: var(--green); color: #fff; }
 .count-dot.miss { background: var(--warn); }
 .count-dot.over { background: var(--sky); }
+
+/* ---------- Копия и пример ---------- */
+.backup-state { display: flex; gap: 14px; align-items: center; }
+.backup-state > .icon { width: 44px; height: 44px; flex: none; }
+.backup-state.due { background: var(--warn); }
+.backup-state.fresh { background: var(--green-tint); }
+.backup-state.fresh > .icon { color: var(--green-dark); }
+.h2 { font-size: 22px; font-weight: 700; }
+.demo-card { display: flex; gap: 14px; align-items: flex-start; background: repeating-linear-gradient(-45deg, #FFF6CC 0 14px, #FFEFA8 14px 28px); }
+.demo-card > .icon { width: 40px; height: 40px; flex: none; }

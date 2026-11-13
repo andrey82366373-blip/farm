@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Icon from './Icon.jsx';
 import { back } from '../lib/router.js';
 import { SPECIES } from '../lib/domain.js';
@@ -196,7 +197,7 @@ export function Sheet({ open, onClose, title, children }) {
     return () => { document.removeEventListener('keydown', onKey); document.body.classList.remove('no-scroll'); };
   }, [open, onClose]);
   if (!open) return null;
-  return (
+  return createPortal(
     <div className="sheet-wrap" onClick={onClose}>
       <div className="sheet" role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
         <div className="sheet-head">
@@ -205,7 +206,8 @@ export function Sheet({ open, onClose, title, children }) {
         </div>
         <div className="sheet-body">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

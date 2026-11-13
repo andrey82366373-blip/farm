@@ -10,6 +10,7 @@ import Birth from './screens/Birth.jsx';
 import Journal from './screens/Journal.jsx';
 import Stats from './screens/Stats.jsx';
 import { Sales, SaleNew, SaleView } from './screens/Sales.jsx';
+import { Backup, Demo } from './screens/Backup.jsx';
 import { CountSetup, CountRun, CountResult, CountView, Counts } from './screens/Count.jsx';
 import { EventChooser, OutForm, VetForm, PurchaseForm } from './screens/EventForms.jsx';
 
@@ -59,6 +60,8 @@ function route(r) {
     case 'stats': return <Stats />;
     case 'sales': return <Sales />;
     case 'counts': return <Counts />;
+    case 'backup': return <Backup />;
+    case 'demo': return <Demo />;
     case 'count':
       if (b === 'run') return <CountRun />;
       if (b === 'result') return <CountResult />;
