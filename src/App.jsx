@@ -1,8 +1,11 @@
-import { useRoute, go } from './lib/router.js';
+import { useRoute, go, back } from './lib/router.js';
 import { UiProvider, Empty, Button, Screen } from './components/ui.jsx';
 import Icon from './components/Icon.jsx';
 import Home from './screens/Home.jsx';
 import More from './screens/More.jsx';
+import Animals from './screens/Animals.jsx';
+import AnimalView from './screens/AnimalView.jsx';
+import AnimalForm from './screens/AnimalForm.jsx';
 
 const TABS = [
   { path: '/', label: 'Главная', icon: 'home' },
@@ -16,7 +19,7 @@ function BottomNav({ path }) {
   return (
     <nav className="nav" aria-label="Разделы">
       {TABS.map((t) => (
-        <button key={t.path} className={active === t.path ? 'on' : ''} onClick={() => active !== t.path && go(t.path, { replace: !!active })} aria-current={active === t.path ? 'page' : undefined}>
+        <button key={t.path} className={active === t.path ? 'on' : ''} onClick={() => active !== t.path && (t.path === '/' ? back('/') : go(t.path, { replace: !!active && active !== '/' }))} aria-current={active === t.path ? 'page' : undefined}>
           <Icon name={t.icon} />
           {t.label}
         </button>
@@ -40,6 +43,11 @@ function route(r) {
   switch (a) {
     case undefined: return <Home />;
     case 'more': return <More />;
+    case 'animals': return <Animals />;
+    case 'animal':
+      if (b === 'new') return <AnimalForm />;
+      if (c === 'edit') return <AnimalForm id={Number(b)} />;
+      return <AnimalView id={Number(b)} />;
     default: return <NotFound />;
   }
 }

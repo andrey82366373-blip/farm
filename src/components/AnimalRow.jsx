@@ -1,6 +1,6 @@
 import Icon from './Icon.jsx';
 import { SpeciesIcon, Tag } from './ui.jsx';
-import { STATUS, groupName, SPECIES } from '../lib/domain.js';
+import { STATUS, SPECIES, groupName, groupOf } from '../lib/domain.js';
 import { fmtAge } from '../lib/format.js';
 
 export function animalSubtitle(a) {
@@ -23,7 +23,7 @@ export default function AnimalRow({ a, onClick, selectable, selected, showSpecie
       {selectable && <span className="check"><Icon name="check" /></span>}
       <Tag tag={a.tag} />
       <span className="row-main">
-        <span className="row-title">{showSpecies ? `${SPECIES[a.species].one}, ` : ''}{groupName(a.species, a.group).toLowerCase()}</span>
+        <span className="row-title">{groupName(a.species, a.group)}{groupOf(a.species, a.group)?.sex === null && SPECIES[a.species].babyLabel[a.sex] ? `, ${SPECIES[a.species].babyLabel[a.sex].toLowerCase()}` : ''}</span>
         <span className="row-sub">{animalSubtitle(a).split(', ').slice(1).join(', ') || ' '}</span>
       </span>
       {out ? <StatusBadge status={a.status} /> : !selectable && showSpecies && <SpeciesIcon species={a.species} size="sm" />}
