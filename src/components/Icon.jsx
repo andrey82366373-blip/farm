@@ -73,6 +73,11 @@ const ICONS = {
   offline: <svg viewBox="0 0 24 24"><g {...S} strokeWidth="2.2"><path d="M2 8.5a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16.3a5 5 0 0 1 6 0" /><path d="M3 3l18 18" /></g></svg>,
   eye: <svg viewBox="0 0 24 24"><g {...S}><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" /><circle cx="12" cy="12" r="3" /></g></svg>,
   female: <svg viewBox="0 0 24 24"><g {...S}><circle cx="12" cy="9" r="5" /><path d="M12 14v7M9 18h6" /></g></svg>,
+  heart: <svg viewBox="0 0 24 24"><path {...S} d="M12 20.5s-8-4.6-8-10.4A4.4 4.4 0 0 1 12 7.4a4.4 4.4 0 0 1 8 2.7c0 5.8-8 10.4-8 10.4Z" /></svg>,
+  hay: <svg viewBox="0 0 24 24"><g {...S}><rect x="3" y="7" width="18" height="12" rx="3" /><path d="M3 11h18M3 15h18M8 7v12M16 7v12" /></g></svg>,
+  coins: <svg viewBox="0 0 24 24"><g {...S}><ellipse cx="9" cy="7" rx="5.5" ry="2.5" /><path d="M3.5 7v4c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V7" /><path d="M9.5 16.5c.9.3 2 .5 3.5.5 3 0 5.5-1.1 5.5-2.5v-4c0-1.2-1.8-2.2-4.3-2.4" /><path d="M3.5 11v4c0 1.4 2.5 2.5 5.5 2.5" /></g></svg>,
+  settings: <svg viewBox="0 0 24 24"><g {...S}><path d="M4 7h10M18 7h2M4 17h4M12 17h8" /><circle cx="16" cy="7" r="2.2" /><circle cx="10" cy="17" r="2.2" /></g></svg>,
+  clock: <svg viewBox="0 0 24 24"><g {...S}><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></g></svg>,
   male: <svg viewBox="0 0 24 24"><g {...S}><circle cx="10" cy="14" r="5" /><path d="M13.5 10.5 20 4M15 4h5v5" /></g></svg>,
 };
 

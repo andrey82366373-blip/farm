@@ -568,3 +568,27 @@ html { scroll-padding-top: 96px; scroll-padding-bottom: 190px; }
 .h2 { font-size: 22px; font-weight: 700; }
 .demo-card { display: flex; gap: 14px; align-items: flex-start; background: repeating-linear-gradient(-45deg, #FFF6CC 0 14px, #FFEFA8 14px 28px); }
 .demo-card > .icon { width: 40px; height: 40px; flex: none; }
+
+/* ---------- Календарь и сроки ---------- */
+.h3 { font-size: 19px; font-weight: 700; }
+.due-badge { min-width: 52px; height: 44px; padding: 0 8px; border-radius: 12px; display: grid; place-items: center; font-weight: 800; font-size: 19px; background: var(--meadow); border: 2px solid var(--ink); font-variant-numeric: tabular-nums; }
+.due-badge.soon { background: var(--tag); }
+.due-badge.late { background: var(--red); color: #fff; border-color: var(--red); }
+.due-preview { display: flex; flex-direction: column; gap: 12px; background: var(--green-tint); }
+.due-line { display: flex; flex-direction: column; gap: 2px; }
+.due-line span { font-weight: 600; }
+.due-line b { font-size: 26px; font-weight: 800; }
+.due-line small { font-size: 15px; color: var(--ink-2); }
+.preg { display: flex; flex-direction: column; gap: 12px; background: var(--green-tint); }
+.preg.late { background: var(--warn); }
+.preg-head { display: flex; gap: 12px; align-items: flex-start; }
+.preg-head > .icon { width: 30px; height: 30px; color: var(--green-dark); margin-top: 2px; }
+.preg-bar { background: var(--surface); }
+.preg .btn-row .btn { margin-bottom: 4px; }
+.counter { display: flex; align-items: center; gap: 14px; padding: 12px 14px; }
+.counter-n { min-width: 72px; text-align: center; font-size: 34px; font-weight: 800; line-height: 1; padding: 10px 6px; border-radius: 14px; background: var(--tag); border: 2px solid var(--ink); font-variant-numeric: tabular-nums; }
+.counter-preview { font-size: 18px; }
+.counter-preview b { font-size: 28px; font-weight: 800; }
+.due-group { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
+.due-group-head { display: flex; align-items: center; gap: 12px; }
+.tag-btn { border-radius: 12px; }

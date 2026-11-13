@@ -16,6 +16,7 @@ const FILTERS = [
   { value: 'birth', label: 'Рождения' },
   { value: 'death', label: 'Падёж' },
   { value: 'vet', label: 'Ветеринар' },
+  { value: 'mating', label: 'Покрытие' },
   { value: 'sale', label: 'Продажи' },
   { value: 'purchase', label: 'Покупки' },
   { value: 'slaughter', label: 'Забой' },

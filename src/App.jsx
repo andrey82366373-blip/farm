@@ -11,6 +11,7 @@ import Journal from './screens/Journal.jsx';
 import Stats from './screens/Stats.jsx';
 import { Sales, SaleNew, SaleView } from './screens/Sales.jsx';
 import { Backup, Demo } from './screens/Backup.jsx';
+import { Calendar, MatingForm, Settings } from './screens/Calendar.jsx';
 import { CountSetup, CountRun, CountResult, CountView, Counts } from './screens/Count.jsx';
 import { EventChooser, OutForm, VetForm, PurchaseForm } from './screens/EventForms.jsx';
 
@@ -61,6 +62,8 @@ function route(r) {
     case 'sales': return <Sales />;
     case 'counts': return <Counts />;
     case 'backup': return <Backup />;
+    case 'calendar': return <Calendar />;
+    case 'settings': return <Settings />;
     case 'demo': return <Demo />;
     case 'count':
       if (b === 'run') return <CountRun />;
@@ -72,6 +75,7 @@ function route(r) {
       if (b === 'death' || b === 'slaughter') return <OutForm type={b} />;
       if (b === 'vet') return <VetForm />;
       if (b === 'purchase') return <PurchaseForm />;
+      if (b === 'mating') return <MatingForm />;
       return <EventChooser />;
     default: return <NotFound />;
   }

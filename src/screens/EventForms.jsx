@@ -16,6 +16,8 @@ const TILES = [
   { to: '/event/purchase', type: 'purchase', title: 'Покупка', sub: 'Новые животные' },
   { to: '/event/death', type: 'death', title: 'Падёж', sub: 'С причиной' },
   { to: '/event/slaughter', type: 'slaughter', title: 'Забой', sub: 'На мясо' },
+  { to: '/event/mating', type: 'mating', title: 'Покрытие', sub: 'Случка, осеменение' },
+  { to: '/calendar', type: 'note', title: 'Календарь', sub: 'Сроки и счётчики дней' },
 ];
 
 export function EventChooser() {

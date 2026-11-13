@@ -179,13 +179,25 @@ export async function loadDemo() {
 
     /* ---------- Лошади ---------- */
     const mare = await A({ species: 'horse', tag: '1', group: 'mare', birthDate: `${y - 9}-05-01`, birthApprox: true, color: 'гнедая', notes: 'Спокойная, ходит под седлом' });
-    await A({ species: 'horse', tag: '2', group: 'mare', birthDate: `${y - 6}-04-20`, color: 'рыжая' });
+    const mare2 = await A({ species: 'horse', tag: '2', group: 'mare', birthDate: `${y - 6}-04-20`, color: 'рыжая' });
     await A({ species: 'horse', tag: '3', sex: 'm', group: 'stallion', birthDate: `${y - 7}-06-10`, birthApprox: true, color: 'вороной' });
     {
       const date = `${y}-05-14`;
       const id = await A({ species: 'horse', tag: '4', sex: 'f', group: 'foal', birthDate: date, motherId: mare, motherTag: '1', color: 'гнедая' });
       await E({ animalId: id, type: 'birth', date, motherId: mare, data: { litter: 1 } });
     }
+
+    /* ---------- Покрытия: ожидаемые роды для календаря ---------- */
+    const M = (animalId, date, data = {}) => E({ animalId, type: 'mating', date, data: { sire: '', note: '', ...data } });
+    const ewesActive = await db.animals.where({ species: 'sheep' }).filter((a) => a.demo && a.status === 'active' && a.group === 'ewe').toArray();
+    for (const a of ewesActive.slice(0, 30)) await M(a.id, addDays(T, -24), { sire: '1' });
+    await M(ewesActive[32].id, addDays(T, -152), { sire: '2', note: 'Покрыта раньше остальных' });
+    await M(cows[3].id, addDays(T, 12 - 283), { sire: '1' });
+    const netel = await db.animals.where({ species: 'cow', tag: '23' }).first();
+    await M(netel.id, addDays(T, 17 - 283), { note: 'Искусственное осеменение' });
+    await M(cows[5].id, addDays(T, -95), { sire: '1' });
+    await M(mare, addDays(T, -165), { sire: '3' });
+    await M(mare2, addDays(T, -200), { sire: '3', failed: true });
 
     /* ---------- Прочие деньги и пересчёты ---------- */
     await db.finance.bulkAdd([

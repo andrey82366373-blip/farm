@@ -29,6 +29,11 @@ export function eventText(e, a) {
       return { title: d.from ? `Бирка: ${d.from} → ${d.to}` : `Присвоена бирка ${d.to}`, sub: '' };
     case 'note':
       return { title: 'Заметка', sub: d.note };
+    case 'mating':
+      return {
+        title: `${sp?.matingWord ?? 'Покрытие'}${d.failed ? ', пустая' : ''}`,
+        sub: [d.sire ? `самец ${d.sire}` : null, d.note].filter(Boolean).join(', '),
+      };
     default:
       return { title: EVENT_TYPES[e.type]?.label ?? 'Событие', sub: sp?.one ?? '' };
   }

@@ -2,14 +2,15 @@ import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../lib/db.js';
 import { useAnimals, herdSummary, filterAnimals, maturityDue, maturityGroups, maturityTitle } from '../lib/data.js';
-import { SPECIES_LIST } from '../lib/domain.js';
-import { fmtDateLong, heads, today, daysBetween, toISO, plural } from '../lib/format.js';
+import { SPECIES, SPECIES_LIST } from '../lib/domain.js';
+import { fmtDate, fmtDateLong, heads, today, daysBetween, toISO, plural } from '../lib/format.js';
 import { go } from '../lib/router.js';
 import { SearchBox, SpeciesIcon, Section, Button } from '../components/ui.jsx';
 import Icon from '../components/Icon.jsx';
 import AnimalRow from '../components/AnimalRow.jsx';
 import MaturitySheet from '../components/MaturitySheet.jsx';
 import { backupDue } from '../lib/backup.js';
+import { useGestation, useMatingEvents, pregnancies, dueGroups, dueLabel } from '../lib/repro.js';
 
 export default function Home() {
   const animals = useAnimals();
@@ -21,6 +22,9 @@ export default function Home() {
   const sum = useMemo(() => herdSummary(animals), [animals]);
   const found = useMemo(() => (q ? filterAnimals(animals, { q, status: 'all' }).slice(0, 6) : []), [animals, q]);
   const matGroups = useMemo(() => maturityGroups(maturityDue(animals)), [animals]);
+  const gestation = useGestation();
+  const matingEvents = useMatingEvents();
+  const due = useMemo(() => dueGroups(pregnancies(animals, matingEvents, gestation)), [animals, matingEvents, gestation]);
 
   if (!animals) return <div className="screen" />;
   const empty = animals.length === 0;
@@ -33,6 +37,16 @@ export default function Home() {
       key: 'backup', when: 'сегодня', cls: 'now', what: 'Сделать копию данных',
       who: days === null ? 'Копии ещё не было' : `Последняя ${days} ${plural(days, 'день', 'дня', 'дней')} назад`,
       onClick: () => go('/backup'),
+    });
+  }
+  for (const g of due) {
+    const first = g.items[0];
+    const one = g.items.length === 1;
+    todos.push({
+      key: `due-${g.species}-${g.from}`, when: dueLabel(first.daysLeft), cls: first.daysLeft <= 7 ? 'now' : 'soon',
+      what: one ? `${SPECIES[g.species].birthWord}: бирка ${first.animal.tag || 'без номера'}` : `${SPECIES[g.species].birthWord}: ${heads(g.items.length)}`,
+      who: first.daysLeft < 0 ? `ждали ${fmtDate(first.due)}, проверьте` : g.from === g.to ? `ожидается ${fmtDate(g.from)}` : `ожидается ${fmtDate(g.from)} – ${fmtDate(g.to)}`,
+      onClick: () => go(one ? `/animal/${first.animal.id}` : '/calendar'),
     });
   }
   for (const g of matGroups) {

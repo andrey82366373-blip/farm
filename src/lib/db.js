@@ -16,7 +16,13 @@ db.version(1).stores({
   settings: 'key',
 });
 
-export const TABLES = ['animals', 'photos', 'events', 'sales', 'finance', 'counts', 'settings'];
+// Версия 2: запасы кормов и журнал их прихода.
+db.version(2).stores({
+  feeds: '++id, demo',
+  feedLog: '++id, feedId, date, demo',
+});
+
+export const TABLES = ['animals', 'photos', 'events', 'sales', 'finance', 'counts', 'settings', 'feeds', 'feedLog'];
 
 // Просим браузер не стирать данные при нехватке места.
 export async function askPersistentStorage() {
@@ -316,4 +322,23 @@ export function saveCount(rec) {
 }
 export function deleteCount(id) {
   return db.counts.delete(id);
+}
+
+/* ---------- Покрытие (случка) ---------- */
+export async function recordMating(ids, { date, sire, note, toNetel }) {
+  return db.transaction('rw', db.animals, db.events, async () => {
+    for (const id of ids) {
+      const a = await db.animals.get(id);
+      await db.events.add(withDemo({ animalId: id, type: 'mating', date, data: { sire: cleanTag(sire) || '', note: note || '' } }, a));
+      if (toNetel && a.species === 'cow' && a.group === 'heifer') {
+        await db.animals.update(id, { group: 'netel' });
+        await db.events.add(withDemo({ animalId: id, type: 'group', date, data: { from: 'heifer', to: 'netel' } }, a));
+      }
+    }
+  });
+}
+
+// «Не покрылась»: срок больше не ждём, запись остаётся в истории.
+export function markMatingFailed(eventId) {
+  return db.events.update(eventId, { 'data.failed': true });
 }

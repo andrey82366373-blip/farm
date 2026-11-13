@@ -3,11 +3,13 @@ import { go } from '../lib/router.js';
 import Icon from '../components/Icon.jsx';
 
 const ITEMS = [
+  { to: '/calendar', icon: 'calendar', title: 'Календарь', sub: 'Сроки окота и отёла, счётчик дней' },
   { to: '/sales', icon: 'sale', title: 'Продажи', sub: 'Сколько продано и на какую сумму' },
   { to: '/counts', icon: 'tally', title: 'Пересчёты', sub: 'Прошлые пересчёты в поле' },
   { to: '/stats', icon: 'chart', title: 'Статистика', sub: 'Родилось и пало за окот, месяц, год' },
   { to: '/backup', icon: 'shield', title: 'Резервная копия', sub: 'Сохранить или восстановить данные' },
   { to: '/demo', icon: 'flask', title: 'Тестовые данные', sub: 'Загрузить пример или удалить его' },
+  { to: '/settings', icon: 'settings', title: 'Настройки', sub: 'Сроки беременности' },
 ];
 
 // Кнопка «Установить» появляется, когда телефон разрешает поставить приложение.

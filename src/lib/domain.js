@@ -4,7 +4,7 @@
 export const SPECIES = {
   sheep: {
     key: 'sheep', one: 'Овца', many: 'Овцы', gen: 'овец', icon: 'sheep',
-    birthWord: 'Окот', newborn: 'lamb',
+    birthWord: 'Окот', matingWord: 'Случка', newborn: 'lamb',
     babyLabel: { m: 'Баранчик', f: 'Ярочка' },
     groups: [
       { key: 'ewe', one: 'Овцематка', many: 'Овцематки', sex: 'f' },
@@ -16,7 +16,7 @@ export const SPECIES = {
   },
   cow: {
     key: 'cow', one: 'Корова', many: 'Коровы', gen: 'коров', icon: 'cow',
-    birthWord: 'Отёл', newborn: 'calf',
+    birthWord: 'Отёл', matingWord: 'Покрытие', newborn: 'calf',
     babyLabel: { m: 'Бычок', f: 'Тёлочка' },
     groups: [
       { key: 'cow', one: 'Корова', many: 'Коровы', sex: 'f' },
@@ -29,7 +29,7 @@ export const SPECIES = {
   },
   horse: {
     key: 'horse', one: 'Лошадь', many: 'Лошади', gen: 'лошадей', icon: 'horse',
-    birthWord: 'Выжеребка', newborn: 'foal',
+    birthWord: 'Выжеребка', matingWord: 'Случка', newborn: 'foal',
     babyLabel: { m: 'Жеребчик', f: 'Кобылка' },
     groups: [
       { key: 'mare', one: 'Кобыла', many: 'Кобылы', sex: 'f' },
@@ -99,7 +99,15 @@ export const EVENT_TYPES = {
   group: { label: 'Смена группы', icon: 'arrowUp', tone: 'green' },
   tag: { label: 'Бирка', icon: 'tag', tone: 'tag' },
   note: { label: 'Заметка', icon: 'note', tone: 'plain' },
+  mating: { label: 'Покрытие', icon: 'heart', tone: 'green' },
 };
+
+// Сроки беременности по умолчанию, дней. Меняются в настройках приложения.
+export const GESTATION_DEFAULT = { sheep: 147, cow: 283, horse: 340 };
+
+// Каких самок можно покрывать.
+export const BREEDING_GROUPS = { sheep: ['ewe', 'yarka'], cow: ['cow', 'netel', 'heifer'], horse: ['mare'] };
+export const isBreeding = (a) => BREEDING_GROUPS[a.species]?.includes(a.group);
 
 export const FINANCE_CATEGORIES = {
   income: [

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, deleteAnimal, assignTag, undoOut, addNote, changeGroup, deleteEvent, byDateDesc } from '../lib/db.js';
-import { SPECIES, groupName, sexLabel, STATUS } from '../lib/domain.js';
+import { db, deleteAnimal, assignTag, undoOut, addNote, changeGroup, deleteEvent, byDateDesc, markMatingFailed } from '../lib/db.js';
+import { SPECIES, groupName, sexLabel, STATUS, isBreeding } from '../lib/domain.js';
 import { fmtAge, fmtDate, today, plural } from '../lib/format.js';
 import { go, back } from '../lib/router.js';
 import { Screen, Tag, SpeciesIcon, Button, Section, Sheet, Field, TagInput, Chips, Empty, useUi, useAction } from '../components/ui.jsx';
@@ -9,8 +9,10 @@ import Icon from '../components/Icon.jsx';
 import AnimalRow, { StatusBadge } from '../components/AnimalRow.jsx';
 import EventItem from '../components/EventItem.jsx';
 import { usePhoto } from '../lib/photo.js';
+import { useGestation, pregnancies } from '../lib/repro.js';
+import { PregnancyBlock } from './Calendar.jsx';
 
-const DELETABLE = new Set(['vet', 'note', 'group', 'tag']);
+const DELETABLE = new Set(['vet', 'note', 'group', 'tag', 'mating']);
 
 export default function AnimalView({ id }) {
   const a = useLiveQuery(() => db.animals.get(id), [id]);
@@ -18,6 +20,8 @@ export default function AnimalView({ id }) {
   const kids = useLiveQuery(() => db.animals.where({ motherId: id }).toArray(), [id]);
   const mother = useLiveQuery(() => (a?.motherId ? db.animals.get(a.motherId) : null), [a?.motherId]);
   const photo = usePhoto(id);
+  const gestation = useGestation();
+  const repro = useLiveQuery(() => db.events.where({ animalId: id }).toArray().then(async (own) => [...own, ...(await db.events.where({ motherId: id }).toArray())]), [id]);
   const { confirm } = useUi();
   const run = useAction();
   const [sheet, setSheet] = useState(null);
@@ -37,6 +41,7 @@ export default function AnimalView({ id }) {
     return [...events, ...birthRows].sort(byDateDesc);
   }, [events, kids]);
 
+  const preg = a && repro ? pregnancies([a], repro, gestation).get(id) : null;
   if (a === undefined) return <Screen title="" />;
   if (a === null) {
     return (
@@ -115,6 +120,18 @@ export default function AnimalView({ id }) {
         </dl>
         {a.notes && <p className="animal-notes">{a.notes}</p>}
       </div>
+
+      {active && isBreeding(a) && repro && (
+        <PregnancyBlock
+          animal={a}
+          p={preg}
+          onFailed={async () => {
+            if (await confirm({ icon: 'heart', title: 'Самка пустая?', text: 'Значит, покрытие не удалось. Срок родов больше не будет считаться, запись о покрытии останется в истории.', ok: 'Да, пустая' })) {
+              await run(() => markMatingFailed(preg.mating.id), 'Отмечено');
+            }
+          }}
+        />
+      )}
 
       {active ? (
         <div className="quick">
