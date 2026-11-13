@@ -25,7 +25,7 @@ export async function loadDemo() {
   const D = { demo: 1 };
   const colors = ['белая', 'белая, чёрная морда', 'серая', 'рыжеватая', 'белая, пятно на ухе', 'тёмная', ''];
 
-  await db.transaction('rw', db.animals, db.events, db.sales, db.finance, db.counts, async () => {
+  await db.transaction('rw', db.animals, db.events, db.sales, db.finance, db.counts, db.feeds, db.feedLog, async () => {
     const A = async (x) => db.animals.add({
       tag: '', sex: 'f', birthDate: null, birthApprox: false, motherId: null, motherTag: null, color: '', notes: '',
       hasPhoto: false, status: 'active', outDate: null, createdAt: Date.now(), ...x, ...D,
@@ -199,6 +199,19 @@ export async function loadDemo() {
     await M(mare, addDays(T, -165), { sire: '3' });
     await M(mare2, addDays(T, -200), { sire: '3', failed: true });
 
+    /* ---------- Корма ---------- */
+    // пустые корма по умолчанию (если раздел уже открывали) заменяем примерными
+    const emptyFeeds = await db.feeds.filter((f) => !f.demo && !f.stock).primaryKeys();
+    await db.feeds.bulkDelete(emptyFeeds);
+    const hay = await db.feeds.add({ name: 'Сено', kind: 'hay', unit: 'рулон', unitKg: 250, price: 2400, norms: { sheep: 2, cow: 10, horse: 8 }, stock: 64, stockDate: addDays(T, -6), ...D });
+    const grain = await db.feeds.add({ name: 'Ячмень', kind: 'grain', unit: 'т', unitKg: 1000, price: 19000, norms: { sheep: 0.3, cow: 2, horse: 2 }, stock: 3.2, stockDate: addDays(T, -6), ...D });
+    await db.feedLog.bulkAdd([
+      { feedId: hay, date: `${y}-08-20`, type: 'in', amount: 40, price: 2400, total: 96000, ...D },
+      { feedId: grain, date: `${y}-10-02`, type: 'in', amount: 2, price: 19000, total: 38000, ...D },
+      { feedId: hay, date: addDays(T, -6), type: 'set', amount: 64, ...D },
+      { feedId: grain, date: addDays(T, -6), type: 'set', amount: 3.2, ...D },
+    ]);
+
     /* ---------- Прочие деньги и пересчёты ---------- */
     await db.finance.bulkAdd([
       { date: `${y}-08-20`, kind: 'expense', category: 'feed', amount: 96000, note: 'Сено, 40 рулонов', ...D },
@@ -217,7 +230,7 @@ export async function loadDemo() {
 
 // Удаляет всё, что относится к тестовым животным, и ничего больше.
 export async function removeDemo() {
-  await db.transaction('rw', db.animals, db.photos, db.events, db.sales, db.finance, db.counts, async () => {
+  await db.transaction('rw', db.animals, db.photos, db.events, db.sales, db.finance, db.counts, db.feeds, db.feedLog, db.settings, async () => {
     const ids = new Set(await db.animals.where('demo').equals(1).primaryKeys());
     const sales = await db.sales.filter((s) => s.demo || s.animalIds.some((id) => ids.has(id))).toArray();
     const saleIds = new Set(sales.map((s) => s.id));
@@ -225,6 +238,9 @@ export async function removeDemo() {
     await db.finance.filter((f) => f.demo || saleIds.has(f.saleId)).delete();
     await db.sales.bulkDelete([...saleIds]);
     await db.counts.filter((c) => c.demo).delete();
+    await db.feedLog.filter((l) => l.demo).delete();
+    await db.feeds.filter((f) => f.demo).delete();
+    if ((await db.feeds.count()) === 0) await db.settings.delete('feedsCreated');
     await db.photos.bulkDelete([...ids]);
     await db.animals.bulkDelete([...ids]);
   });

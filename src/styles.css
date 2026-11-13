@@ -592,3 +592,29 @@ html { scroll-padding-top: 96px; scroll-padding-bottom: 190px; }
 .due-group { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
 .due-group-head { display: flex; align-items: center; gap: 12px; }
 .tag-btn { border-radius: 12px; }
+
+/* ---------- Корма ---------- */
+.until { display: flex; align-items: center; gap: 14px; text-align: left; width: 100%; background: var(--sky-2); }
+.until > .icon { width: 34px; height: 34px; }
+.until .row-title { font-size: 22px; }
+.until-edit { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 14px; font-weight: 700; }
+.feed { display: flex; flex-direction: column; gap: 14px; }
+.feed-head { display: flex; align-items: center; gap: 12px; text-align: left; width: 100%; }
+.feed-head > .icon:last-child { color: var(--ink-2); }
+.feed-ico { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; border: var(--bw) solid var(--ink); background: #F3E9C6; color: #6B5317; flex: none; }
+.feed-ico.grain { background: #FFF1C2; color: #8A5A00; }
+.feed-ico .icon { width: 30px; height: 30px; }
+.feed-stock { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.feed-stock span { display: block; font-weight: 600; color: var(--ink-2); font-size: 16px; }
+.feed-stock b { font-size: 24px; font-weight: 800; line-height: 1.15; }
+.feed-bar { height: 16px; border-radius: 99px; border: 2px solid var(--ink); background: var(--meadow); overflow: hidden; }
+.feed-bar i { display: block; height: 100%; background: var(--green); }
+.feed-warn .feed-bar i { background: #E0A100; }
+.feed-bad .feed-bar i { background: var(--red); }
+.feed-bad { box-shadow: inset 0 0 0 3px var(--red); }
+.feed-note { font-size: 17px; line-height: 1.4; }
+.feed-total { display: flex; flex-direction: column; gap: 6px; background: var(--tag); }
+.feed-total span { font-weight: 600; }
+.feed-total b { font-size: 32px; font-weight: 800; }
+.feed-total .btn { align-self: flex-start; margin-top: 6px; }
+.feed .btn-row .btn { margin-bottom: 4px; }
