@@ -10,6 +10,7 @@ import Birth from './screens/Birth.jsx';
 import Journal from './screens/Journal.jsx';
 import Stats from './screens/Stats.jsx';
 import { Sales, SaleNew, SaleView } from './screens/Sales.jsx';
+import { CountSetup, CountRun, CountResult, CountView, Counts } from './screens/Count.jsx';
 import { EventChooser, OutForm, VetForm, PurchaseForm } from './screens/EventForms.jsx';
 
 const TABS = [
@@ -57,6 +58,12 @@ function route(r) {
     case 'journal': return <Journal />;
     case 'stats': return <Stats />;
     case 'sales': return <Sales />;
+    case 'counts': return <Counts />;
+    case 'count':
+      if (b === 'run') return <CountRun />;
+      if (b === 'result') return <CountResult />;
+      if (b) return <CountView id={Number(b)} />;
+      return <CountSetup />;
     case 'sale': return b === 'new' ? <SaleNew /> : <SaleView id={Number(b)} />;
     case 'event':
       if (b === 'death' || b === 'slaughter') return <OutForm type={b} />;
