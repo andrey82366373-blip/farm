@@ -217,7 +217,14 @@ export async function loadDemo() {
       { date: `${y}-08-20`, kind: 'expense', category: 'feed', amount: 96000, note: 'Сено, 40 рулонов', ...D },
       { date: `${y}-10-02`, kind: 'expense', category: 'feed', amount: 38000, note: 'Ячмень, 2 т', ...D },
       { date: `${y}-06-25`, kind: 'income', category: 'wool', amount: 14500, note: 'Шерсть после стрижки', ...D },
+      { date: `${y}-07-15`, kind: 'income', category: 'meat', amount: 42000, note: 'Мясо: полтуши бычка', ...D },
     ]);
+    // мелкие расходы каждый месяц: ветеринар, солярка, соль
+    for (let i = 1; i <= 10; i++) {
+      const d = addDays(T, -30 * i + 4);
+      await db.finance.add({ date: d, kind: 'expense', category: 'other', amount: 3500 + Math.round(r() * 30) * 100, note: pick(['Солярка', 'Соль-лизунец', 'Электричество', 'Запчасти для трактора']), ...D });
+      if (i % 2) await db.finance.add({ date: addDays(d, 9), kind: 'expense', category: 'vet', amount: 1500 + Math.round(r() * 25) * 100, note: pick(['Лекарства', 'Вызов ветеринара', 'Шприцы, бинты']), ...D });
+    }
     const ewesNow = await db.animals.where({ species: 'sheep' }).filter((a) => a.demo && a.status === 'active' && a.group === 'ewe').toArray();
     await db.counts.add({ date: addDays(T, -12), at: Date.now() - 12 * 864e5, species: 'sheep', group: 'ewe', expected: ewesNow.length, counted: ewesNow.length, marked: false, seenIds: [], missingIds: [], ...D });
     const miss = ewesNow[ewesNow.length - 3];

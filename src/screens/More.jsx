@@ -5,6 +5,7 @@ import Icon from '../components/Icon.jsx';
 const ITEMS = [
   { to: '/calendar', icon: 'calendar', title: 'Календарь', sub: 'Сроки окота и отёла, счётчик дней' },
   { to: '/feed', icon: 'hay', title: 'Корма', sub: 'Запасы, на сколько хватит, сколько докупить' },
+  { to: '/finance', icon: 'coins', title: 'Финансы', sub: 'Доходы, расходы, прогноз трат' },
   { to: '/sales', icon: 'sale', title: 'Продажи', sub: 'Сколько продано и на какую сумму' },
   { to: '/counts', icon: 'tally', title: 'Пересчёты', sub: 'Прошлые пересчёты в поле' },
   { to: '/stats', icon: 'chart', title: 'Статистика', sub: 'Родилось и пало за окот, месяц, год' },

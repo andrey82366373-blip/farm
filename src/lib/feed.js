@@ -62,7 +62,7 @@ export function feedCalc(f, counts, until, at = today()) {
   return {
     unitKg, dailyKg, daily, stock, daysLeft, toUntil, need,
     runOut: Number.isFinite(daysLeft) ? addDays(at, Math.floor(daysLeft)) : null,
-    needCost: need * (Number(f.price) || 0),
+    needCost: Math.ceil(need - 1e-9) * (Number(f.price) || 0), // покупают целыми рулонами и мешками
     costTillUntil: daily * toUntil * (Number(f.price) || 0),
   };
 }

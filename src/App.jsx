@@ -13,6 +13,7 @@ import { Sales, SaleNew, SaleView } from './screens/Sales.jsx';
 import { Backup, Demo } from './screens/Backup.jsx';
 import { Calendar, MatingForm, Settings } from './screens/Calendar.jsx';
 import { Feed, FeedEdit } from './screens/Feed.jsx';
+import { Finance, MoneyEntry, Plan } from './screens/Finance.jsx';
 import { CountSetup, CountRun, CountResult, CountView, Counts } from './screens/Count.jsx';
 import { EventChooser, OutForm, VetForm, PurchaseForm } from './screens/EventForms.jsx';
 
@@ -64,6 +65,9 @@ function route(r) {
     case 'counts': return <Counts />;
     case 'backup': return <Backup />;
     case 'calendar': return <Calendar />;
+    case 'finance': return <Finance />;
+    case 'plan': return <Plan />;
+    case 'money': return b === 'new' ? <MoneyEntry /> : <MoneyEntry id={Number(b)} />;
     case 'feed': return b === 'new' ? <FeedEdit /> : b ? <FeedEdit id={Number(b)} /> : <Feed />;
     case 'settings': return <Settings />;
     case 'demo': return <Demo />;

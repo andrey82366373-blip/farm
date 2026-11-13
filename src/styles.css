@@ -24,6 +24,9 @@
   --earth-tint: #F3E6D6;
   --horse: #2C4E6B;
   --horse-tint: #E3EEF7;
+  /* цвета графиков: проверены на различимость при дальтонизме */
+  --c-income: #2E7D32;
+  --c-expense: #D9822B;
 
   --bw: 3px;
   --r: 20px;
@@ -502,13 +505,13 @@ html { scroll-padding-top: 96px; scroll-padding-bottom: 190px; }
 .chart .grid { stroke: var(--soft); stroke-width: 1; stroke-dasharray: 3 4; }
 .chart .axis { stroke: var(--ink); stroke-width: 2; }
 .chart .bar-born { fill: var(--green); }
-.chart .bar-died { fill: var(--red); }
+.chart .bar-died { fill: var(--c-expense); }
 .chart .val { font: 700 11px var(--font); fill: var(--ink); text-anchor: middle; }
 .chart .mon { font: 600 11px var(--font); fill: var(--ink-2); text-anchor: middle; }
 .chart-legend { display: flex; gap: 16px; padding: 0 6px; font-size: 16px; font-weight: 600; }
 .lg::before { content: ""; display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-right: 6px; vertical-align: -1px; }
 .lg-born::before { background: var(--green); }
-.lg-died::before { background: var(--red); }
+.lg-died::before { background: var(--c-expense); }
 .ev-group { flex-direction: column; gap: 10px; }
 .ev-group-head { display: flex; align-items: flex-start; gap: 12px; width: 100%; text-align: left; }
 .ev-group-list { display: flex; flex-direction: column; border-top: 2px dashed var(--soft); padding-top: 4px; width: 100%; }
@@ -618,3 +621,53 @@ html { scroll-padding-top: 96px; scroll-padding-bottom: 190px; }
 .feed-total b { font-size: 32px; font-weight: 800; }
 .feed-total .btn { align-self: flex-start; margin-top: 6px; }
 .feed .btn-row .btn { margin-bottom: 4px; }
+
+/* ---------- Финансы ---------- */
+.bg-income { background: var(--c-income); }
+.bg-expense { background: var(--c-expense); }
+.dot { display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-right: 8px; vertical-align: -1px; }
+.chart .bar-income { fill: var(--c-income); }
+.chart .bar-expense { fill: var(--c-expense); }
+.lg-income::before { background: var(--c-income); }
+.lg-expense::before { background: var(--c-expense); }
+.chart .hit { fill: transparent; }
+.chart .sel { fill: var(--sky-2); stroke: var(--ink); stroke-width: 1.5; }
+.chart .tick { font: 600 11px var(--font); fill: var(--ink-2); }
+.chart .mon.on { font-weight: 800; fill: var(--ink); }
+.chart .bar-group.dim { opacity: .35; }
+.readout { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; padding: 8px 6px 4px; border-top: 2px dashed var(--soft); font-size: 16px; }
+.readout b { width: 100%; font-size: 17px; }
+.money-sum { display: flex; flex-direction: column; gap: 10px; }
+.money-line { display: flex; justify-content: space-between; align-items: baseline; font-size: 18px; }
+.money-line b { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.money-net { display: flex; justify-content: space-between; align-items: baseline; border-top: 2px dashed var(--soft); padding-top: 10px; }
+.money-net span { font-weight: 700; }
+.money-net b { font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.money-net.plus b { color: var(--green-dark); }
+.money-net.minus b { color: var(--red); }
+.cats { display: flex; flex-direction: column; gap: 12px; }
+.cat-top { display: flex; justify-content: space-between; gap: 10px; font-size: 17px; margin-bottom: 4px; }
+.cat-top b { font-weight: 800; font-variant-numeric: tabular-nums; }
+.cat-bar { height: 14px; border-radius: 99px; background: var(--surface); border: 2px solid var(--ink); overflow: hidden; }
+.cat-bar i { display: block; height: 100%; border-radius: 0 4px 4px 0; }
+.plan-link { display: flex; align-items: center; gap: 12px; text-align: left; width: 100%; background: var(--sky-2); }
+.plan-link > .icon:first-child { width: 32px; height: 32px; }
+.money-ico { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--ink); flex: none; }
+.money-ico.income { background: var(--green-tint); color: var(--green-dark); }
+.money-ico.expense { background: #FBE7D3; color: #8A4B0B; }
+.money-amt { font-weight: 800; font-size: 18px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.money-amt.income { color: var(--green-dark); }
+.input-money { font-size: 28px; font-weight: 800; }
+.plan-sum { display: flex; flex-direction: column; gap: 12px; }
+.plan-sum > div > span { display: block; font-weight: 600; color: var(--ink-2); }
+.plan-sum > div > b { font-size: 30px; font-weight: 800; }
+.plan-sum small { display: block; color: var(--ink-2); font-size: 15px; }
+.plan-buy { border-top: 2px dashed var(--soft); padding-top: 10px; }
+.plan-line { display: flex; justify-content: space-between; gap: 10px; font-size: 17px; }
+.fc-table { display: flex; flex-direction: column; padding: 4px 16px; }
+.fc-row { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 10px 0; border-bottom: 2px dashed var(--soft); }
+.fc-row:last-child { border-bottom: 0; }
+.fc-row b { font-weight: 800; font-variant-numeric: tabular-nums; }
+.fc-row small { grid-column: 1 / -1; color: var(--ink-2); font-size: 15px; }
+.fc-month { font-weight: 600; }
+.fc-total { font-size: 19px; }

@@ -74,7 +74,7 @@ export function Feed() {
             <div className="feed-bar"><i style={{ width: `${pct}%` }} /></div>
             <div className="feed-note">
               {c.runOut && c.daysLeft < c.toUntil ? `Закончится ≈ ${fmtDate(c.runOut)}. ` : c.daily > 0 ? `Хватит до ${fmtDate(until)} с запасом. ` : ''}
-              {c.need > 0 && <>До {fmtDate(until)} нужно докупить <b>{fmtUnits(Math.ceil(c.need), f.unit)}</b>{f.price ? <>, это ≈ <b>{fmtRub(Math.ceil(c.need) * f.price)}</b></> : ''}.</>}
+              {c.need > 0 && <>До {fmtDate(until)} нужно докупить <b>{fmtUnits(Math.ceil(c.need), f.unit)}</b>{f.price ? <>, это ≈ <b>{fmtRub(c.needCost)}</b></> : ''}.</>}
             </div>
             <div className="btn-row">
               <Button icon="plus" onClick={() => setSheet({ type: 'in', f })}>Привезли</Button>
@@ -88,7 +88,7 @@ export function Feed() {
         <div className="card feed-total">
           <span>Всего на докупку кормов до {fmtDate(until)}</span>
           <b>≈ {fmtRub(totalNeed)}</b>
-          <Button size="sm" icon="coins" onClick={() => go('/finance')}>Открыть финансы</Button>
+          <Button size="sm" icon="coins" onClick={() => go('/plan')}>План трат по месяцам</Button>
         </div>
       )}
       <p className="pill-note">Остаток уменьшается сам каждый день по нормам расхода. Если пересчитали запас, нажмите «Остаток» и введите точное число.</p>
