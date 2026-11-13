@@ -16,7 +16,7 @@ import App from './App.jsx';
 import { askPersistentStorage } from './lib/db.js';
 
 // Приложение сохраняется в телефоне и потом открывается без интернета.
-registerSW({ immediate: true });
+if (!import.meta.env.VITE_NO_SW) registerSW({ immediate: true });
 askPersistentStorage();
 
 createRoot(document.getElementById('root')).render(
