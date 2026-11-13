@@ -11,6 +11,7 @@ import AnimalRow from '../components/AnimalRow.jsx';
 import MaturitySheet from '../components/MaturitySheet.jsx';
 import { backupDue } from '../lib/backup.js';
 import { useGestation, useMatingEvents, pregnancies, dueGroups, dueLabel } from '../lib/repro.js';
+import { useFeedUntil, headcount, feedCalc, fmtUnits } from '../lib/feed.js';
 
 export default function Home() {
   const animals = useAnimals();
@@ -24,6 +25,8 @@ export default function Home() {
   const matGroups = useMemo(() => maturityGroups(maturityDue(animals)), [animals]);
   const gestation = useGestation();
   const matingEvents = useMatingEvents();
+  const feeds = useLiveQuery(() => db.feeds.toArray(), []);
+  const feedUntil = useFeedUntil();
   const due = useMemo(() => dueGroups(pregnancies(animals, matingEvents, gestation)), [animals, matingEvents, gestation]);
 
   if (!animals) return <div className="screen" />;
@@ -37,6 +40,17 @@ export default function Home() {
       key: 'backup', when: 'сегодня', cls: 'now', what: 'Сделать копию данных',
       who: days === null ? 'Копии ещё не было' : `Последняя ${days} ${plural(days, 'день', 'дня', 'дней')} назад`,
       onClick: () => go('/backup'),
+    });
+  }
+  // корма заканчиваются меньше чем через 2 недели (и нужны дальше)
+  const counts = headcount(animals);
+  for (const f of feeds || []) {
+    const c = feedCalc(f, counts, feedUntil);
+    if (!c.daily || c.daysLeft >= 14 || c.daysLeft >= c.toUntil) continue;
+    const d = Math.floor(c.daysLeft);
+    todos.push({
+      key: `feed-${f.id}`, when: d <= 0 ? 'кончился' : `${d} дн.`, cls: 'now', what: `${f.name} заканчивается`,
+      who: `осталось ≈ ${fmtUnits(c.stock, f.unit)}, нужно докупить`, onClick: () => go('/feed'),
     });
   }
   for (const g of due) {
