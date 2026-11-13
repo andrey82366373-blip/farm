@@ -61,7 +61,8 @@ img { max-width: 100%; display: block; }
 .app { max-width: 600px; margin: 0 auto; min-height: 100dvh; position: relative; }
 .screen { min-height: 100dvh; display: flex; flex-direction: column; padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 24px); }
 .screen.no-nav { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); }
-.screen.with-footer { padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
+.screen.with-footer { padding-bottom: calc(180px + env(safe-area-inset-bottom, 0px)); }
+html { scroll-padding-top: 96px; scroll-padding-bottom: 190px; }
 .content {
   flex: 1; display: flex; flex-direction: column; gap: 20px;
   padding: 16px max(16px, env(safe-area-inset-left, 0px)) 0 max(16px, env(safe-area-inset-right, 0px));
@@ -437,3 +438,80 @@ img { max-width: 100%; display: block; }
 .hero + .content { position: relative; z-index: 2; }
 .input::placeholder, .textarea::placeholder { font-weight: 400; letter-spacing: 0; color: #5d6b56; }
 .seg-btn { font-size: 17px; }
+
+/* ---------- Выбор животных ---------- */
+.picker { display: flex; flex-direction: column; gap: 14px; }
+.picker-tag { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start; }
+.picker-tag .btn { min-height: 60px; }
+.picker-msg { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--green-dark); margin-top: -4px; }
+.picker-msg.bad { color: var(--red); }
+.picker-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--ink-2); }
+.picker-bar .btn { margin-bottom: 0; box-shadow: none; }
+.picked { display: flex; flex-direction: column; gap: 12px; }
+.picked-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.picked-head .btn { margin-bottom: 0; box-shadow: none; }
+.picked-tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.date-quick { display: flex; gap: 8px; }
+
+/* ---------- Выбор события ---------- */
+.ev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ev-tile {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px; min-height: 120px; text-align: left;
+  background: var(--surface); border: var(--bw) solid var(--ink); border-radius: var(--r); box-shadow: var(--press); margin-bottom: 4px;
+}
+.ev-tile:active { transform: translateY(4px); box-shadow: none; }
+.ev-tile .ev-ico { width: 54px; height: 54px; border-radius: 16px; border-width: 3px; }
+.ev-tile .ev-ico .icon { width: 32px; height: 32px; }
+.ev-tile b { font-size: 20px; }
+.ev-tile small { font-size: 15px; color: var(--ink-2); line-height: 1.25; }
+
+/* ---------- Рождение ---------- */
+.baby { display: flex; flex-direction: column; gap: 12px; position: relative; }
+.baby-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.baby-head b { font-size: 20px; }
+.baby.dead { background: #F4F4F0; }
+.mother-found { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: var(--r-s); background: var(--green-tint); border: 2px solid var(--green-dark); }
+.mother-found.bad { background: var(--red-tint); border-color: var(--red); color: var(--red); font-weight: 600; }
+.stepper { display: grid; grid-template-columns: 64px 1fr 64px; align-items: center; gap: 10px; }
+.stepper .btn { min-height: 60px; padding: 0; margin-bottom: 4px; }
+.stepper b { text-align: center; font-size: 36px; font-weight: 800; }
+.buy-row { display: grid; grid-template-columns: 40px 1fr; gap: 8px 10px; align-items: center; }
+.buy-row > :nth-child(n+3) { grid-column: 2; }
+.buy-n { font-weight: 800; font-size: 20px; text-align: center; color: var(--ink-2); }
+
+/* ---------- Статистика ---------- */
+.metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.metric { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border-radius: var(--r-s); border: 2px solid var(--ink); }
+.metric span { font-weight: 600; font-size: 17px; }
+.metric b { font-size: 38px; font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.metric small { font-size: 14px; font-weight: 500; opacity: .9; }
+.metric.tone-red b { color: var(--red); }
+.causes { display: flex; flex-direction: column; gap: 8px; }
+.cause { display: flex; justify-content: space-between; font-size: 18px; padding: 6px 0; border-top: 2px dashed var(--soft); }
+.cause b { font-weight: 800; }
+.season { display: flex; flex-direction: column; gap: 12px; }
+.season h2 { font-size: 22px; }
+.survival { display: flex; flex-direction: column; gap: 6px; font-size: 17px; }
+.survival-bar { height: 16px; border-radius: 99px; background: var(--red-tint); border: 2px solid var(--ink); overflow: hidden; }
+.survival-bar i { display: block; height: 100%; background: var(--green); }
+.period-nav { display: grid; grid-template-columns: 60px 1fr 60px; align-items: center; gap: 10px; }
+.period-nav b { text-align: center; font-size: 21px; }
+.period-nav .btn { padding: 0; min-height: 56px; }
+.chart { padding: 12px 10px 6px; display: flex; flex-direction: column; gap: 6px; }
+.chart svg { width: 100%; height: auto; display: block; }
+.chart .grid { stroke: var(--soft); stroke-width: 1; stroke-dasharray: 3 4; }
+.chart .axis { stroke: var(--ink); stroke-width: 2; }
+.chart .bar-born { fill: var(--green); }
+.chart .bar-died { fill: var(--red); }
+.chart .val { font: 700 11px var(--font); fill: var(--ink); text-anchor: middle; }
+.chart .mon { font: 600 11px var(--font); fill: var(--ink-2); text-anchor: middle; }
+.chart-legend { display: flex; gap: 16px; padding: 0 6px; font-size: 16px; font-weight: 600; }
+.lg::before { content: ""; display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-right: 6px; vertical-align: -1px; }
+.lg-born::before { background: var(--green); }
+.lg-died::before { background: var(--red); }
+.ev-group { flex-direction: column; gap: 10px; }
+.ev-group-head { display: flex; align-items: flex-start; gap: 12px; width: 100%; text-align: left; }
+.ev-group-list { display: flex; flex-direction: column; border-top: 2px dashed var(--soft); padding-top: 4px; width: 100%; }
+.ev-group-row { display: flex; align-items: center; gap: 12px; min-height: 52px; text-align: left; font-weight: 600; width: 100%; }
+.ev-group-row span:nth-child(2) { flex: 1; }
+.ev-group-row .icon { color: var(--ink-2); }

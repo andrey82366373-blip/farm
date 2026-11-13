@@ -6,6 +6,10 @@ import More from './screens/More.jsx';
 import Animals from './screens/Animals.jsx';
 import AnimalView from './screens/AnimalView.jsx';
 import AnimalForm from './screens/AnimalForm.jsx';
+import Birth from './screens/Birth.jsx';
+import Journal from './screens/Journal.jsx';
+import Stats from './screens/Stats.jsx';
+import { EventChooser, OutForm, VetForm, PurchaseForm } from './screens/EventForms.jsx';
 
 const TABS = [
   { path: '/', label: 'Главная', icon: 'home' },
@@ -48,6 +52,14 @@ function route(r) {
       if (b === 'new') return <AnimalForm />;
       if (c === 'edit') return <AnimalForm id={Number(b)} />;
       return <AnimalView id={Number(b)} />;
+    case 'birth': return <Birth />;
+    case 'journal': return <Journal />;
+    case 'stats': return <Stats />;
+    case 'event':
+      if (b === 'death' || b === 'slaughter') return <OutForm type={b} />;
+      if (b === 'vet') return <VetForm />;
+      if (b === 'purchase') return <PurchaseForm />;
+      return <EventChooser />;
     default: return <NotFound />;
   }
 }

@@ -268,3 +268,38 @@ export function useAction() {
     }
   }, [notify]);
 }
+
+/* ---------- Дата с быстрыми кнопками ---------- */
+export function DateField({ label = 'Дата', value, onChange, id = 'date' }) {
+  const t = new Date();
+  const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const todayIso = iso(t);
+  const y = new Date(t); y.setDate(t.getDate() - 1);
+  const yIso = iso(y);
+  return (
+    <Field label={label} htmlFor={id}>
+      <div className="date-quick">
+        <button className={`chip press ${value === todayIso ? 'on' : ''}`} onClick={() => onChange(todayIso)}>Сегодня</button>
+        <button className={`chip press ${value === yIso ? 'on' : ''}`} onClick={() => onChange(yIso)}>Вчера</button>
+      </div>
+      <input id={id} className="input" type="date" max={todayIso} value={value} onChange={(e) => e.target.value && onChange(e.target.value)} />
+    </Field>
+  );
+}
+
+/* ---------- Выбранные животные ---------- */
+export function PickedSummary({ animals, onEdit, title }) {
+  const shown = animals.slice(0, 40);
+  return (
+    <div className="card picked">
+      <div className="picked-head">
+        <span className="row-title">{title ?? 'Выбрано'}: {animals.length}</span>
+        {onEdit && <Button size="sm" icon="edit" onClick={onEdit}>Изменить</Button>}
+      </div>
+      <div className="picked-tags">
+        {shown.map((a) => <Tag key={a.id} tag={a.tag} size="sm" />)}
+        {animals.length > shown.length && <span className="muted">и ещё {animals.length - shown.length}</span>}
+      </div>
+    </div>
+  );
+}
