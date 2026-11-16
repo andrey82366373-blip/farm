@@ -25,12 +25,26 @@ db.version(2).stores({
 export const TABLES = ['animals', 'photos', 'events', 'sales', 'finance', 'counts', 'settings', 'feeds', 'feedLog'];
 
 // Просим браузер не стирать данные при нехватке места.
+// Возвращает true, если телефон пообещал хранить данные постоянно.
 export async function askPersistentStorage() {
   try {
-    if (navigator.storage?.persist && !(await navigator.storage.persisted())) {
-      await navigator.storage.persist();
-    }
+    if (!navigator.storage?.persist) return false;
+    if (await navigator.storage.persisted()) return true;
+    return await navigator.storage.persist();
+  } catch {
+    return false;
+  }
+}
+
+// Состояние хранилища для экрана настроек.
+export async function storageStatus() {
+  const s = { supported: !!navigator.storage?.persisted, persisted: false, usage: null, quota: null };
+  try {
+    if (s.supported) s.persisted = await navigator.storage.persisted();
+    const e = await navigator.storage?.estimate?.();
+    if (e) { s.usage = e.usage ?? null; s.quota = e.quota ?? null; }
   } catch { /* не страшно */ }
+  return s;
 }
 
 /* ---------- Настройки ---------- */

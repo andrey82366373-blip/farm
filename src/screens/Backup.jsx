@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../lib/db.js';
-import { downloadBackup, shareBackup, canShareFiles, readBackupFile, backupStats, restoreBackup, backupDue } from '../lib/backup.js';
+import { db, askPersistentStorage, storageStatus } from '../lib/db.js';
+import { downloadBackup, shareOrDownload, canShareFiles, readBackupFile, backupStats, restoreBackup, backupDue } from '../lib/backup.js';
 import { loadDemo, removeDemo } from '../lib/demo.js';
 import { fmtDate, toISO, heads, daysBetween, today, plural } from '../lib/format.js';
 import { go } from '../lib/router.js';
@@ -31,10 +31,11 @@ export function Backup() {
   const send = async () => {
     setBusy(true);
     try {
-      await shareBackup();
-      notify('Копия отправлена');
-    } catch (e) {
-      if (e?.name !== 'AbortError') notify('Не получилось отправить. Сохраните файл кнопкой выше.', 'error');
+      const r = await shareOrDownload();
+      if (r === 'shared') notify('Копия отправлена');
+      if (r === 'downloaded') notify('Этот телефон не умеет делиться файлом. Копия сохранена в «Загрузки»');
+    } catch {
+      notify('Не получилось сделать копию. Попробуйте ещё раз.', 'error');
     }
     setBusy(false);
   };
@@ -70,9 +71,11 @@ export function Backup() {
 
       <p>Все записи хранятся только в этом телефоне. Если телефон сломается или потеряется, данные можно вернуть только из файла копии. Делайте копию раз в неделю, приложение напомнит.</p>
 
-      {share && <Button kind="primary" size="lg" icon="share" block disabled={busy} onClick={send}>Отправить копию</Button>}
-      {share && <p className="pill-note">Лучший способ: отправьте файл себе в Телеграм, Ватсап или на почту. Тогда копия будет не только в телефоне.</p>}
-      <Button kind={share ? 'plain' : 'primary'} size="lg" icon="download" block disabled={busy} onClick={save}>Сохранить файл в телефон</Button>
+      <Button kind="primary" size="lg" icon="share" block disabled={busy} onClick={send}>Поделиться копией</Button>
+      <p className="pill-note">{share ? 'Откроется выбор приложения: отправьте файл себе или родным в Telegram, WhatsApp или на почту. Тогда копия будет не только в телефоне.' : 'Этот браузер не умеет делиться файлами, поэтому копия сохранится в «Загрузки». Оттуда её можно отправить в Telegram или WhatsApp.'}</p>
+      <Button size="lg" icon="download" block disabled={busy} onClick={save}>Сохранить файл в телефон</Button>
+
+      <StorageCard />
 
       <div className="divider" />
 
@@ -148,5 +151,37 @@ export function Demo() {
         <Button kind="primary" size="lg" icon="flask" block disabled={busy} onClick={load}>Загрузить тестовые данные</Button>
       )}
     </Screen>
+  );
+}
+
+/* ---------- Постоянное хранилище ---------- */
+// Показывает, пообещал ли телефон не удалять данные при нехватке памяти.
+export function StorageCard() {
+  const [st, setSt] = useState(null);
+  const { notify } = useUi();
+  useEffect(() => { storageStatus().then(setSt); }, []);
+  if (!st) return null;
+  const mb = (n) => (n == null ? null : n < 1048576 ? '< 1 МБ' : `${Math.round(n / 1048576)} МБ`);
+  const ask = async () => {
+    const ok = await askPersistentStorage();
+    setSt(await storageStatus());
+    notify(ok ? 'Защита данных включена' : 'Телефон пока не разрешил. Установите приложение на экран и попробуйте снова.', ok ? 'ok' : 'error');
+  };
+  return (
+    <div className={`card storage ${st.persisted ? 'on' : 'off'}`}>
+      <Icon name={st.persisted ? 'shield' : 'warning'} />
+      <div className="banner-body">
+        <div className="banner-title">{st.persisted ? 'Защита данных включена' : st.supported ? 'Защита данных выключена' : 'Защита данных недоступна'}</div>
+        <p>
+          {st.persisted
+            ? 'Телефон не удалит записи сам, даже если закончится память.'
+            : st.supported
+              ? 'Если в телефоне закончится память, Android может удалить записи. Включите защиту. Чаще всего телефон разрешает её после установки приложения на экран.'
+              : 'Этот браузер не умеет защищать данные от удаления. Откройте приложение в Chrome и чаще делайте копию.'}
+        </p>
+        {st.usage != null && <p className="pill-note">Занято {mb(st.usage)}{st.quota ? ` из ${mb(st.quota)} доступных` : ''}.</p>}
+        {st.supported && !st.persisted && <Button kind="dark" icon="shield" onClick={ask}>Включить защиту</Button>}
+      </div>
+    </div>
   );
 }

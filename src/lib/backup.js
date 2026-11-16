@@ -4,8 +4,9 @@ import { today } from './format.js';
 const WEEK = 7 * 24 * 3600 * 1000;
 
 // Напоминаем о копии, если есть данные и прошло больше недели.
-export function backupDue(animalCount, lastBackupAt) {
+export function backupDue(animalCount, lastBackupAt, snoozeUntil) {
   if (!animalCount) return false;
+  if (snoozeUntil && Date.now() < snoozeUntil) return false;
   if (!lastBackupAt) return true;
   return Date.now() - lastBackupAt > WEEK;
 }
@@ -120,4 +121,19 @@ export async function restoreBackup(data) {
     if (!(data.tables.settings || []).some((r) => r.key === 'dataVersion')) await db.settings.delete('dataVersion');
   });
   await migrate();
+}
+
+// «Поделиться копией»: открывает выбор приложения (Телеграм, Ватсап, почта).
+// Если телефон так не умеет, файл сохраняется в «Загрузки».
+export async function shareOrDownload() {
+  if (canShareFiles()) {
+    try {
+      await shareBackup();
+      return 'shared';
+    } catch (e) {
+      if (e?.name === 'AbortError') return 'cancelled';
+    }
+  }
+  await downloadBackup();
+  return 'downloaded';
 }

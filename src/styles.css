@@ -733,3 +733,14 @@ body { transition: background-color .4s; }
 .compare-head { border-top: 0; font-size: 16px; font-weight: 600; color: var(--ink-2); padding: 0; }
 .compare-bar { grid-column: 1 / -1; height: 10px; border-radius: 99px; background: var(--red-tint); border: 2px solid var(--ink); overflow: hidden; display: block; }
 .compare-bar i { display: block; height: 100%; background: var(--green); }
+
+/* ---------- Копия и защита данных ---------- */
+.banner-backup { background: var(--tag); border-width: 3px; flex-direction: column; gap: 10px; }
+.banner-backup > .icon { width: 44px; height: 44px; }
+.banner-backup .banner-title { font-size: 24px; }
+.banner-backup .btn-ghost { align-self: center; }
+.storage { display: flex; gap: 14px; align-items: flex-start; }
+.storage > .icon { width: 40px; height: 40px; flex: none; }
+.storage.on { background: var(--green-tint); }
+.storage.on > .icon { color: var(--green-dark); }
+.storage.off { background: var(--warn); }

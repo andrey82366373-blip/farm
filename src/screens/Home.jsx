@@ -9,7 +9,9 @@ import { SearchBox, SpeciesIcon, Section, Button } from '../components/ui.jsx';
 import Icon from '../components/Icon.jsx';
 import AnimalRow from '../components/AnimalRow.jsx';
 import MaturitySheet from '../components/MaturitySheet.jsx';
-import { backupDue } from '../lib/backup.js';
+import { backupDue, shareOrDownload } from '../lib/backup.js';
+import { setSetting } from '../lib/db.js';
+import { useUi } from '../components/ui.jsx';
 import { shotReminders } from '../lib/shots.js';
 import { useGestation, useMatingEvents, pregnancies, dueGroups, dueLabel } from '../lib/repro.js';
 import { useFeedUntil, headcount, feedCalc, fmtUnits } from '../lib/feed.js';
@@ -18,6 +20,8 @@ export default function Home() {
   const animals = useAnimals();
   const lastBackup = useLiveQuery(() => db.settings.get('lastBackupAt').then((r) => r?.value ?? null), []);
   const hasDemo = useLiveQuery(() => db.animals.where('demo').equals(1).count(), []);
+  const snooze = useLiveQuery(() => db.settings.get('backupSnoozeUntil').then((r) => r?.value ?? 0), []);
+  const { notify } = useUi();
   const [q, setQ] = useState('');
   const [mat, setMat] = useState(null);
 
@@ -34,17 +38,17 @@ export default function Home() {
 
   if (!animals) return <div className="screen" />;
   const empty = animals.length === 0;
-  const needBackup = backupDue(animals.length, lastBackup);
+  const needBackup = backupDue(animals.length, lastBackup, snooze);
+  const backupDays = lastBackup ? daysBetween(toISO(new Date(lastBackup)), today()) : null;
+  const shareNow = async () => {
+    try {
+      const r = await shareOrDownload();
+      if (r === 'shared') notify('Копия отправлена');
+      if (r === 'downloaded') notify('Копия сохранена в «Загрузки»');
+    } catch { notify('Не получилось сделать копию', 'error'); }
+  };
 
   const todos = [];
-  if (needBackup) {
-    const days = lastBackup ? daysBetween(toISO(new Date(lastBackup)), today()) : null;
-    todos.push({
-      key: 'backup', when: 'сегодня', cls: 'now', what: 'Сделать копию данных',
-      who: days === null ? 'Копии ещё не было' : `Последняя ${days} ${plural(days, 'день', 'дня', 'дней')} назад`,
-      onClick: () => go('/backup'),
-    });
-  }
   // корма заканчиваются меньше чем через 2 недели (и нужны дальше)
   const counts = headcount(animals);
   for (const f of feeds || []) {
@@ -98,6 +102,18 @@ export default function Home() {
             </div>
             {!found.length && <Button icon="plus" onClick={() => go(/^\d+$/.test(q) ? `/animal/new?tag=${q}` : `/animal/new?species=cow&name=${encodeURIComponent(q)}`)}>Добавить: {q}</Button>}
           </Section>
+        )}
+
+        {needBackup && (
+          <div className="banner banner-backup" role="alert">
+            <Icon name="shield" />
+            <div className="banner-body">
+              <div className="banner-title">Пора сделать копию данных</div>
+              <p>{backupDays === null ? 'Копии ещё не было.' : `Последняя копия была ${backupDays} ${plural(backupDays, 'день', 'дня', 'дней')} назад.`} Если телефон сломается, записи можно вернуть только из копии.</p>
+              <Button kind="dark" size="lg" icon="share" block onClick={shareNow}>Поделиться копией</Button>
+              <Button kind="ghost" onClick={() => setSetting('backupSnoozeUntil', Date.now() + 24 * 3600 * 1000)}>Напомнить завтра</Button>
+            </div>
+          </div>
         )}
 
         {hasDemo > 0 && (

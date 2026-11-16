@@ -9,6 +9,7 @@ import { go, back } from '../lib/router.js';
 import { Screen, Button, Field, DateField, PickedSummary, IdInput, Segmented, Section, Empty, Tag, useUi, useAction } from '../components/ui.jsx';
 import Icon from '../components/Icon.jsx';
 import { PickStep, useIdsFromQuery } from './EventForms.jsx';
+import { StorageCard } from './Backup.jsx';
 
 const dayWord = (n) => plural(n, 'день', 'дня', 'дней');
 
@@ -282,6 +283,10 @@ export function Settings() {
           </Field>
         ))}
         <Button kind="ghost" onClick={() => setVals({ ...GESTATION_DEFAULT })}>Вернуть обычные сроки</Button>
+      </Section>
+      <Section title="Хранение данных">
+        <StorageCard />
+        <Button icon="shield" block onClick={() => go('/backup')}>Резервная копия</Button>
       </Section>
       <Section title="Тавро">
         <Field label="Тавро для новых коров и лошадей" htmlFor="defBrand" hint="Буква или знак клейма. У каждого животного его можно поменять в карточке.">
