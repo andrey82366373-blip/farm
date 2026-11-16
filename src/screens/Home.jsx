@@ -10,6 +10,7 @@ import Icon from '../components/Icon.jsx';
 import AnimalRow from '../components/AnimalRow.jsx';
 import MaturitySheet from '../components/MaturitySheet.jsx';
 import { backupDue } from '../lib/backup.js';
+import { shotReminders } from '../lib/shots.js';
 import { useGestation, useMatingEvents, pregnancies, dueGroups, dueLabel } from '../lib/repro.js';
 import { useFeedUntil, headcount, feedCalc, fmtUnits } from '../lib/feed.js';
 
@@ -25,6 +26,8 @@ export default function Home() {
   const matGroups = useMemo(() => maturityGroups(maturityDue(animals)), [animals]);
   const gestation = useGestation();
   const matingEvents = useMatingEvents();
+  const vet = useLiveQuery(() => db.events.where('type').equals('vet').toArray(), []);
+  const shotOff = useLiveQuery(() => db.settings.get('shotDismissed').then((r) => r?.value || []), []);
   const feeds = useLiveQuery(() => db.feeds.toArray(), []);
   const feedUntil = useFeedUntil();
   const due = useMemo(() => dueGroups(pregnancies(animals, matingEvents, gestation)), [animals, matingEvents, gestation]);
@@ -51,6 +54,15 @@ export default function Home() {
     todos.push({
       key: `feed-${f.id}`, when: d <= 0 ? 'кончился' : `${d} дн.`, cls: 'now', what: `${f.name} заканчивается`,
       who: `осталось ≈ ${fmtUnits(c.stock, f.unit)}, нужно докупить`, onClick: () => go('/feed'),
+    });
+  }
+  const byId = new Map(animals.map((a) => [a.id, a]));
+  for (const r of shotReminders(vet, byId, shotOff || [])) {
+    const n = daysBetween(today(), r.nextDate);
+    todos.push({
+      key: `shot-${r.key}`, when: n < 0 ? 'пора' : n === 0 ? 'сегодня' : n === 1 ? 'завтра' : `${n} дн.`, cls: n <= 3 ? 'now' : 'soon',
+      what: `Повторить: ${r.drug}`, who: `${heads(r.ids.length)}${n < 0 ? `, срок был ${fmtDate(r.nextDate)}` : `, ${fmtDate(r.nextDate)}`}`,
+      onClick: () => go(`/event/vet?drug=${encodeURIComponent(r.drug)}&dose=${encodeURIComponent(r.dose)}&kind=${r.kind || 'vaccine'}&target=${r.ids.join(',')}`),
     });
   }
   for (const g of due) {
@@ -140,6 +152,7 @@ export default function Home() {
               <span>Пересчёт<small>посчитать в поле</small></span>
             </button>
             <button className="action press" onClick={() => go('/birth')}><Icon name="birth" />Родились</button>
+            <button className="action press" onClick={() => go('/event/vet')}><Icon name="vet" />Укол</button>
             <button className="action press" onClick={() => go('/sale/new')}><Icon name="sale" />Продажа</button>
             <button className="action action-wide press" onClick={() => go('/event')}><Icon name="note" />Записать событие</button>
           </div>

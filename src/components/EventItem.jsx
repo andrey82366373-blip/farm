@@ -20,7 +20,10 @@ export function eventText(e, a) {
     case 'slaughter':
       return { title: 'Забой', sub: [d.weight ? `${fmtNum(d.weight)} кг` : null, d.note].filter(Boolean).join(', ') };
     case 'vet':
-      return { title: vetLabel(d.kind), sub: [d.drug, d.note].filter(Boolean).join(', ') };
+      return {
+        title: d.drug ? `${vetLabel(d.kind)}: ${d.drug}` : vetLabel(d.kind),
+        sub: [d.dose ? `доза ${d.dose}` : null, d.note, d.nextDate ? `повтор ${fmtDate(d.nextDate, { year: true })}` : null].filter(Boolean).join(', '),
+      };
     case 'sale':
       return { title: 'Продажа', sub: d.buyer ? `покупатель: ${d.buyer}` : '' };
     case 'group':

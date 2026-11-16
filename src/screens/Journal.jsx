@@ -15,7 +15,7 @@ const FILTERS = [
   { value: null, label: 'Все' },
   { value: 'birth', label: 'Рождения' },
   { value: 'death', label: 'Падёж' },
-  { value: 'vet', label: 'Ветеринар' },
+  { value: 'vet', label: 'Уколы' },
   { value: 'mating', label: 'Покрытие' },
   { value: 'sale', label: 'Продажи' },
   { value: 'purchase', label: 'Покупки' },
@@ -69,6 +69,13 @@ export default function Journal() {
           <span className="row-main">
             <span className="row-title">Статистика</span>
             <span className="row-sub">Сколько родилось и пало за окот, месяц, год</span>
+          </span>
+        </button>
+        <button className="row press" onClick={() => go('/shots')}>
+          <span className="row-ico"><Icon name="vet" /></span>
+          <span className="row-main">
+            <span className="row-title">Уколы и прививки</span>
+            <span className="row-sub">Сводка по каждому препарату</span>
           </span>
         </button>
         <Chips options={FILTERS} value={type} onChange={(v) => { setType(v); setLimit(80); }} wrap={false} />

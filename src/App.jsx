@@ -15,7 +15,8 @@ import { Calendar, MatingForm, Settings } from './screens/Calendar.jsx';
 import { Feed, FeedEdit } from './screens/Feed.jsx';
 import { Finance, MoneyEntry, Plan } from './screens/Finance.jsx';
 import { CountSetup, CountRun, CountResult, CountView, Counts } from './screens/Count.jsx';
-import { EventChooser, OutForm, VetForm, PurchaseForm } from './screens/EventForms.jsx';
+import { EventChooser, OutForm, PurchaseForm } from './screens/EventForms.jsx';
+import { ShotForm, Shots } from './screens/Shot.jsx';
 
 const TABS = [
   { path: '/', label: 'Главная', icon: 'home' },
@@ -64,6 +65,7 @@ function route(r) {
     case 'sales': return <Sales />;
     case 'counts': return <Counts />;
     case 'backup': return <Backup />;
+    case 'shots': return <Shots />;
     case 'calendar': return <Calendar />;
     case 'finance': return <Finance />;
     case 'plan': return <Plan />;
@@ -79,7 +81,7 @@ function route(r) {
     case 'sale': return b === 'new' ? <SaleNew /> : <SaleView id={Number(b)} />;
     case 'event':
       if (b === 'death' || b === 'slaughter') return <OutForm type={b} />;
-      if (b === 'vet') return <VetForm />;
+      if (b === 'vet') return <ShotForm />;
       if (b === 'purchase') return <PurchaseForm />;
       if (b === 'mating') return <MatingForm />;
       return <EventChooser />;

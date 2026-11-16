@@ -691,3 +691,22 @@ body { transition: background-color .4s; }
 .hero + .content { padding-top: 22px; }
 .sp-ico { border-radius: 50%; border-width: 0; }
 .nav .on .icon { box-shadow: none; }
+
+/* ---------- Укол, прививка ---------- */
+.shot-counter { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 82px); z-index: 15; background: var(--ink); color: #fff; border-radius: var(--r); padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+.shot-nums { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.shot-nums span { display: block; font-size: 17px; font-weight: 600; opacity: .85; }
+.shot-nums b { font-size: 56px; font-weight: 800; line-height: 1; }
+.shot-nums div:nth-child(2) b { color: var(--tag); }
+.shot-nums .ok b { color: #9BE29F; }
+.shot-bar { height: 12px; border-radius: 99px; background: rgba(255,255,255,.25); overflow: hidden; }
+.shot-bar i { display: block; height: 100%; background: var(--tag); transition: width .25s; }
+.shot-sub { font-size: 17px; opacity: .9; }
+.drug { display: flex; flex-direction: column; gap: 12px; }
+.drug-head { display: flex; align-items: flex-start; gap: 14px; text-align: left; width: 100%; }
+.drug-head > .icon { color: var(--ink-2); transition: transform .2s; margin-top: 8px; }
+.drug-head > .icon.rot { transform: rotate(90deg); }
+.drug-list { display: flex; flex-direction: column; border-top: 2px dashed var(--soft); }
+.drug-row { display: flex; flex-direction: column; gap: 2px; padding: 12px 0; border-bottom: 2px dashed var(--soft); font-size: 18px; }
+.drug-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.drug-row small { color: var(--ink-2); font-size: 16px; }

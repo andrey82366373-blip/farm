@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import { db, recordOut, recordVet, recordPurchase, findTagOwner } from '../lib/db.js';
+import { recordOut, recordPurchase, findTagOwner } from '../lib/db.js';
 import { useAnimals } from '../lib/data.js';
-import { SPECIES, DEATH_CAUSES, VET_KINDS, groupOf, causeLabel } from '../lib/domain.js';
+import { SPECIES, DEATH_CAUSES, groupOf, causeLabel } from '../lib/domain.js';
 import { today, toISO, parseISO, parseNum, heads, fmtRub } from '../lib/format.js';
 import { go, back, useRoute } from '../lib/router.js';
 import { Screen, Button, Field, Chips, Segmented, DateField, PickedSummary, SpeciesPicker, TagInput, useAction } from '../components/ui.jsx';
@@ -11,7 +11,7 @@ import AnimalPicker from '../components/AnimalPicker.jsx';
 /* ---------- Какое событие записать ---------- */
 const TILES = [
   { to: '/birth', type: 'birth', title: 'Родились', sub: 'Окот, отёл, выжеребка' },
-  { to: '/event/vet', type: 'vet', title: 'Ветеринар', sub: 'Прививка, лечение' },
+  { to: '/event/vet', type: 'vet', title: 'Укол, прививка', sub: 'Одному или всей группе' },
   { to: '/sale/new', type: 'sale', title: 'Продажа', sub: 'Одно или несколько' },
   { to: '/event/purchase', type: 'purchase', title: 'Покупка', sub: 'Новые животные' },
   { to: '/event/death', type: 'death', title: 'Падёж', sub: 'С причиной' },
@@ -109,70 +109,6 @@ export function OutForm({ type }) {
           <textarea id="note" className="textarea" value={note} onChange={(e) => setNote(e.target.value)} placeholder={isDeath ? `Что случилось (${causeLabel(cause).toLowerCase()})` : 'Например: на мясо для себя'} />
         </Field>
         <p className="pill-note">Животные уйдут из поголовья, но останутся в истории. Если ошиблись, в карточке есть кнопка «Вернуть на хозяйство».</p>
-      </div>
-    </Screen>
-  );
-}
-
-/* ---------- Ветеринария ---------- */
-export function VetForm() {
-  const animals = useAnimals();
-  const initial = useIdsFromQuery();
-  const [selected, setSelected] = useState(initial);
-  const [step, setStep] = useState(initial.size ? 'details' : 'pick');
-  const [date, setDate] = useState(today());
-  const [kind, setKind] = useState('vaccine');
-  const [drug, setDrug] = useState('');
-  const [cost, setCost] = useState('');
-  const [note, setNote] = useState('');
-  const run = useAction();
-
-  if (!animals) return <Screen title="Ветеринар" />;
-  if (step === 'pick') {
-    return (
-      <PickStep
-        title="Ветеринар" animals={animals} selected={selected} setSelected={setSelected} onNext={() => setStep('details')}
-        hint="Прививали всё стадо? Выберите вид и группу, затем «Выбрать всех»."
-      />
-    );
-  }
-  const picked = animals.filter((a) => selected.has(a.id));
-
-  const save = async () => {
-    const ok = await run(async () => {
-      await recordVet(picked.map((a) => a.id), { date, kind, drug, note });
-      const c = parseNum(cost);
-      if (c) {
-        await db.finance.add({ date, kind: 'expense', category: 'vet', amount: c, note: `${VET_KINDS.find((v) => v.key === kind)?.label}${drug ? ': ' + drug : ''}, ${heads(picked.length)}` });
-      }
-    }, `Записано: ${heads(picked.length)}`);
-    if (ok) back('/');
-  };
-
-  return (
-    <Screen
-      title="Ветеринар"
-      className="with-footer"
-      footer={<Button kind="primary" size="lg" block icon="check" onClick={save}>Записать</Button>}
-    >
-      <div className="form">
-        <PickedSummary animals={picked} onEdit={() => setStep('pick')} />
-        <Field label="Что делали">
-          <Chips options={VET_KINDS.map((v) => ({ value: v.key, label: v.label }))} value={kind} onChange={setKind} />
-        </Field>
-        <DateField value={date} onChange={setDate} />
-        <Field label="Препарат" htmlFor="drug">
-          <input id="drug" className="input" value={drug} onChange={(e) => setDrug(e.target.value)} placeholder="Название, доза" />
-        </Field>
-        <Field label="Стоимость, ₽" hint="Если платили. Попадёт в расходы." htmlFor="cost">
-          <div className="input-unit">
-            <input id="cost" className="input" inputMode="decimal" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="0" />
-            <span>₽</span>
-          </div>
-        </Field>
-        <Field label="Заметка" htmlFor="note">
-          <textarea id="note" className="textarea" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Например: повторить через 21 день" />
-        </Field>
       </div>
     </Screen>
   );

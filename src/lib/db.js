@@ -248,11 +248,11 @@ export async function undoOut(id) {
   });
 }
 
-export async function recordVet(ids, { date, kind, drug, note }) {
+export async function recordVet(ids, { date, kind, drug, dose, note, nextDate }) {
   return db.transaction('rw', db.animals, db.events, async () => {
     for (const id of ids) {
       const a = await db.animals.get(id);
-      await db.events.add(withDemo({ animalId: id, type: 'vet', date, data: { kind, drug: drug || '', note: note || '' } }, a));
+      await db.events.add(withDemo({ animalId: id, type: 'vet', date, data: { kind, drug: (drug || '').trim(), dose: (dose || '').trim(), note: note || '', nextDate: nextDate || null } }, a));
     }
   });
 }

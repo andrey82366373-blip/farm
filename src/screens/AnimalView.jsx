@@ -38,10 +38,11 @@ export default function AnimalView({ id }) {
       births.get(k.birthDate).push(k);
     }
     const birthRows = [...births.entries()].map(([date, list]) => ({ id: `b${date}`, type: 'motherBirth', date, list }));
-    return [...events, ...birthRows].sort(byDateDesc);
+    return [...events.filter((e) => e.type !== 'vet'), ...birthRows].sort(byDateDesc);
   }, [events, kids]);
 
   const preg = a && repro ? pregnancies([a], repro, gestation).get(id) : null;
+  const shots = (events || []).filter((e) => e.type === 'vet').sort(byDateDesc);
   if (a === undefined) return <Screen title="" />;
   if (a === null) {
     return (
@@ -135,7 +136,7 @@ export default function AnimalView({ id }) {
 
       {active ? (
         <div className="quick">
-          <button className="quick-btn press" onClick={() => go(`/event/vet?ids=${id}`)}><Icon name="vet" />Ветеринар</button>
+          <button className="quick-btn press" onClick={() => go(`/event/vet?ids=${id}`)}><Icon name="vet" />Укол</button>
           <button className="quick-btn press" onClick={() => setSheet('note')}><Icon name="note" />Заметка</button>
           <button className="quick-btn press" onClick={() => setSheet('group')}><Icon name="arrowUp" />Группа</button>
           <button className="quick-btn press" onClick={() => go(`/sale/new?ids=${id}`)}><Icon name="sale" />Продать</button>
@@ -158,9 +159,24 @@ export default function AnimalView({ id }) {
         </Section>
       )}
 
+      {shots.length > 0 && (
+        <Section title={`Уколы и прививки: ${shots.length}`}>
+          <div className="timeline">
+            {shots.map((e) => (
+              <EventItem
+                key={e.id}
+                e={e}
+                a={a}
+                right={<button className="ev-del press" onClick={() => doDeleteEvent(e)} aria-label="Удалить запись"><Icon name="trash" /></button>}
+              />
+            ))}
+          </div>
+        </Section>
+      )}
+
       <Section title="История">
         {history.length === 0 ? (
-          <p className="muted">Пока нет записей. Здесь появятся рождение, прививки, лечение и другие события.</p>
+          <p className="muted">Пока нет записей. Здесь появятся рождение, смена группы, продажа и другие события.</p>
         ) : (
           <div className="timeline">
             {history.map((e) => e.type === 'motherBirth' ? (

@@ -7,6 +7,13 @@ import { addMonths, monthsBetween, today } from './format.js';
 export const useAnimals = () => useLiveQuery(() => db.animals.toArray(), []);
 export const useAnimal = (id) => useLiveQuery(() => db.animals.get(id), [id]);
 
+// Подходит ли животное под то, что ввели в поиск: бирка, кличка или номер.
+export function matchesExactly(a, q) {
+  const s = String(q || '').trim().toLowerCase();
+  if (!s) return false;
+  return a.tag === s || (a.name || '').trim().toLowerCase() === s || (a.chip || '') === s;
+}
+
 export function activeOf(animals) {
   return (animals || []).filter((a) => a.status === 'active');
 }
