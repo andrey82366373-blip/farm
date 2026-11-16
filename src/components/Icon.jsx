@@ -78,6 +78,7 @@ const ICONS = {
   coins: <svg viewBox="0 0 24 24"><g {...S}><ellipse cx="9" cy="7" rx="5.5" ry="2.5" /><path d="M3.5 7v4c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V7" /><path d="M9.5 16.5c.9.3 2 .5 3.5.5 3 0 5.5-1.1 5.5-2.5v-4c0-1.2-1.8-2.2-4.3-2.4" /><path d="M3.5 11v4c0 1.4 2.5 2.5 5.5 2.5" /></g></svg>,
   settings: <svg viewBox="0 0 24 24"><g {...S}><path d="M4 7h10M18 7h2M4 17h4M12 17h8" /><circle cx="16" cy="7" r="2.2" /><circle cx="10" cy="17" r="2.2" /></g></svg>,
   clock: <svg viewBox="0 0 24 24"><g {...S}><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></g></svg>,
+  fuel: <svg viewBox="0 0 24 24"><g {...S}><path d="M4 20.5V5.5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v15M3 20.5h12M6.5 7.5h5v4h-5Z" /><path d="M14 11h2a1.5 1.5 0 0 1 1.5 1.5v4a1.5 1.5 0 0 0 3 0V9l-2.5-2.5" /></g></svg>,
   male: <svg viewBox="0 0 24 24"><g {...S}><circle cx="10" cy="14" r="5" /><path d="M13.5 10.5 20 4M15 4h5v5" /></g></svg>,
 };
 

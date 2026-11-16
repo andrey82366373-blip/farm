@@ -170,6 +170,7 @@ export default function Home() {
             <button className="action press" onClick={() => go('/birth')}><Icon name="birth" />Родились</button>
             <button className="action press" onClick={() => go('/event/vet')}><Icon name="vet" />Укол</button>
             <button className="action press" onClick={() => go('/sale/new')}><Icon name="sale" />Продажа</button>
+            <button className="action press" onClick={() => go('/fuel/new')}><Icon name="fuel" />Заправка</button>
             <button className="action action-wide press" onClick={() => go('/event')}><Icon name="note" />Записать событие</button>
           </div>
         )}

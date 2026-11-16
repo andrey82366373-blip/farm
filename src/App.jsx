@@ -16,6 +16,7 @@ import { Backup, Demo } from './screens/Backup.jsx';
 import { Calendar, MatingForm, Settings } from './screens/Calendar.jsx';
 import { Feed, FeedEdit } from './screens/Feed.jsx';
 import { Finance, MoneyEntry, Plan } from './screens/Finance.jsx';
+import { Fuel, FuelEntry } from './screens/Fuel.jsx';
 import { CountSetup, CountRun, CountResult, CountView, Counts } from './screens/Count.jsx';
 import { EventChooser, OutForm, PurchaseForm } from './screens/EventForms.jsx';
 import { ShotForm, Shots } from './screens/Shot.jsx';
@@ -70,6 +71,7 @@ function route(r) {
     case 'shots': return <Shots />;
     case 'calendar': return <Calendar />;
     case 'finance': return <Finance />;
+    case 'fuel': return b === 'new' ? <FuelEntry /> : b ? <FuelEntry id={Number(b)} /> : <Fuel />;
     case 'plan': return <Plan />;
     case 'money': return b === 'new' ? <MoneyEntry /> : <MoneyEntry id={Number(b)} />;
     case 'feed': return b === 'new' ? <FeedEdit /> : b ? <FeedEdit id={Number(b)} /> : <Feed />;

@@ -119,6 +119,7 @@ export const FINANCE_CATEGORIES = {
   ],
   expense: [
     { key: 'feed', label: 'Корма' },
+    { key: 'fuel', label: 'Топливо' },
     { key: 'vet', label: 'Ветеринар' },
     { key: 'animals', label: 'Покупка животных' },
     { key: 'other', label: 'Прочее' },

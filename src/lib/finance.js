@@ -27,15 +27,17 @@ function overlap(ym, a, b) {
 }
 
 // Прогноз трат по месяцам: корма (когда закончится запас и до даты «до»)
-// плюс средние траты на ветеринара и прочее за последние полгода.
+// плюс средние траты на топливо, ветеринара и прочее за последние полгода.
 export function forecast({ finance, feeds, counts, until, months = 6, at = today() }) {
   const curYm = at.slice(0, 7);
   // среднее «прочих» расходов за 6 полных прошлых месяцев
   const from = monthRange(shiftMonth(curYm, -6)).from;
   const to = monthRange(shiftMonth(curYm, -1)).to;
-  const other = finance
-    .filter((r) => r.kind === 'expense' && (r.category === 'vet' || r.category === 'other') && r.date >= from && r.date <= to)
+  const avg = (cats) => finance
+    .filter((r) => r.kind === 'expense' && cats.includes(r.category) && r.date >= from && r.date <= to)
     .reduce((s, r) => s + r.amount, 0) / 6;
+  const other = avg(['vet', 'other']);
+  const fuel = avg(['fuel']); // топливо: среднее за те же полгода
 
   const feedParts = feeds.map((f) => {
     const c = feedCalc(f, counts, until, at);
@@ -56,9 +58,9 @@ export function forecast({ finance, feeds, counts, until, months = 6, at = today
     }
     // текущий месяц: «прочее» только за оставшиеся дни
     const share = i === 0 ? (monthRange(ym).to === at ? 0 : (daysBetween(at, monthRange(ym).to) + 1) / Number(monthRange(ym).to.slice(8))) : 1;
-    out.push({ ym, feed, byFeed, other: other * share, total: feed + other * share });
+    out.push({ ym, feed, byFeed, fuel: fuel * share, other: other * share, total: feed + (fuel + other) * share });
   }
-  return { months: out, otherAvg: other, feedParts };
+  return { months: out, otherAvg: other, fuelAvg: fuel, feedParts };
 }
 
 export function monthsAgo(n, at = today()) {

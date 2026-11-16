@@ -126,7 +126,7 @@ export function Finance() {
         ) : (
           <div className="list">
             {list.slice(0, limit).map((r) => (
-              <button key={r.id} className="row money-row press" onClick={() => (r.saleId ? go(`/sale/${r.saleId}`) : go(`/money/${r.id}`))}>
+              <button key={r.id} className="row money-row press" onClick={() => (r.saleId ? go(`/sale/${r.saleId}`) : r.category === 'fuel' && r.fuel ? go(`/fuel/${r.id}`) : go(`/money/${r.id}`))}>
                 <span className={`money-ico ${r.kind}`}><Icon name={r.kind === 'income' ? 'plus' : 'minus'} /></span>
                 <span className="row-main">
                   <span className="row-title">{catLabel(r.kind, r.category)}</span>
@@ -258,12 +258,12 @@ export function Plan() {
             <div key={m.ym} className="fc-row">
               <span className="fc-month">{fmtMonth(m.ym)}</span>
               <b>≈ {fmtRub(m.total)}</b>
-              <small>корма {fmtRub(m.feed)}, ветеринар и прочее {fmtRub(m.other)}</small>
+              <small>корма {fmtRub(m.feed)}, топливо {fmtRub(m.fuel)}, ветеринар и прочее {fmtRub(m.other)}</small>
             </div>
           ))}
           <div className="fc-row fc-total"><span className="fc-month">Всего за полгода</span><b>≈ {fmtRub(sixMonths)}</b></div>
         </div>
-        <p className="pill-note">Корма считаются с того дня, когда закончится нынешний запас, и до {fmtDate(until)}. Ветеринар и прочее — среднее за последние полгода ({fmtRub(fc.otherAvg)} в месяц).</p>
+        <p className="pill-note">Корма считаются с того дня, когда закончится нынешний запас, и до {fmtDate(until)}. Топливо, ветеринар и прочее считаются как среднее за последние полгода: топливо {fmtRub(fc.fuelAvg)} в месяц, остальное {fmtRub(fc.otherAvg)}.</p>
       </Section>
     </Screen>
   );

@@ -224,7 +224,16 @@ export async function loadDemo() {
     // мелкие расходы каждый месяц: ветеринар, солярка, соль
     for (let i = 1; i <= 10; i++) {
       const d = addDays(T, -30 * i + 4);
-      await db.finance.add({ date: d, kind: 'expense', category: 'other', amount: 3500 + Math.round(r() * 30) * 100, note: pick(['Солярка', 'Соль-лизунец', 'Электричество', 'Запчасти для трактора']), ...D });
+      await db.finance.add({ date: d, kind: 'expense', category: 'other', amount: 3500 + Math.round(r() * 30) * 100, note: pick(['Соль-лизунец', 'Электричество', 'Запчасти для трактора']), ...D });
+      // заправки: машина два раза в месяц, трактор раз в месяц
+      const p92 = 52 + (10 - i) * 0.35, pd = 61 + (10 - i) * 0.4;
+      const fuelRow = (date, type, liters, price, vehicle) => db.finance.add({
+        date, kind: 'expense', category: 'fuel', amount: Math.round(liters * price * 100) / 100,
+        note: `${type}, ${liters} л, ${vehicle.toLowerCase()}`, fuel: { type, liters, price: Math.round(price * 100) / 100, vehicle, note: '' }, ...D,
+      });
+      await fuelRow(addDays(d, 2), 'АИ-92', 30 + Math.round(r() * 15), p92, 'Машина');
+      await fuelRow(addDays(d, 16), 'АИ-92', 28 + Math.round(r() * 12), p92, 'Машина');
+      await fuelRow(addDays(d, 11), 'Дизель', 60 + Math.round(r() * 60), pd, 'Трактор');
       if (i % 2) await db.finance.add({ date: addDays(d, 9), kind: 'expense', category: 'vet', amount: 1500 + Math.round(r() * 25) * 100, note: pick(['Лекарства', 'Вызов ветеринара', 'Шприцы, бинты']), ...D });
     }
     const ewesNow = await db.animals.where({ species: 'sheep' }).filter((a) => a.demo && a.status === 'active' && a.group === 'ewe').toArray();
