@@ -721,3 +721,15 @@ body { transition: background-color .4s; }
 .ident-lg .brand { min-width: 60px; height: 60px; font-size: 34px; border-radius: 14px; }
 .ident-lg .ident-name { font-size: 38px; }
 .input-brand { max-width: 120px; text-align: center; font-weight: 800; font-size: 28px; }
+
+/* ---------- Сезоны окота ---------- */
+.season-src { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.season-src .btn { margin: 0; }
+.season-twins { font-size: 19px; }
+.compare { display: flex; flex-direction: column; gap: 12px; }
+.compare h2 { font-size: 24px; }
+.compare-row { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr 1.1fr; gap: 4px 8px; align-items: baseline; padding: 10px 0; border-top: 2px dashed var(--soft); font-size: 20px; }
+.compare-row b { font-weight: 800; }
+.compare-head { border-top: 0; font-size: 16px; font-weight: 600; color: var(--ink-2); padding: 0; }
+.compare-bar { grid-column: 1 / -1; height: 10px; border-radius: 99px; background: var(--red-tint); border: 2px solid var(--ink); overflow: hidden; display: block; }
+.compare-bar i { display: block; height: 100%; background: var(--green); }

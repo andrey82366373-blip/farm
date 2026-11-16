@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../lib/db.js';
+import { db, setSetting } from '../lib/db.js';
 import { useAnimals } from '../lib/data.js';
 import { SPECIES, SPECIES_LIST, causeLabel } from '../lib/domain.js';
 import { fmtMonth, fmtDate, today, MONTHS_SHORT } from '../lib/format.js';
 import { useKeep } from '../lib/router.js';
-import { Screen, Chips, Segmented, Button, Empty } from '../components/ui.jsx';
+import { Screen, Chips, Segmented, Button, Empty, Sheet, Field, useUi, useAction } from '../components/ui.jsx';
 import { withSpecies, metrics, seasons, seasonTitle, monthRange, shiftMonth, yearMonths } from '../lib/stats.js';
 
 function MetricGrid({ m }) {
@@ -84,7 +84,9 @@ export default function Stats() {
   const mode = !species && mode0 === 'season' ? 'month' : mode0;
   const byId = useMemo(() => new Map((animals || []).map((a) => [a.id, a])), [animals]);
   const evs = useMemo(() => withSpecies(events || [], byId), [events, byId]);
-  const seas = useMemo(() => (species ? seasons(evs, byId, species) : []), [evs, byId, species]);
+  const manual = useLiveQuery(() => db.settings.get('seasons').then((r) => r?.value || []), []);
+  const [edit, setEdit] = useState(null);
+  const seas = useMemo(() => (species ? seasons(evs, byId, species, manual || [], 60, today()) : []), [evs, byId, species, manual]);
 
   if (!animals || !events) return <Screen title="Статистика" />;
   const word = species ? SPECIES[species].birthWord : 'Окот';
@@ -105,18 +107,31 @@ export default function Stats() {
       />
 
       {mode === 'season' && species && (
-        seas.length === 0 ? (
+        <>
+        <Button kind="primary" icon="calendar" block onClick={() => setEdit({ species, from: today(), to: '' })}>Указать даты: {word.toLowerCase()}</Button>
+        {seas.length === 0 ? (
           <Empty icon="birth" title="Рождений пока не было" text={`Когда запишете ${word.toLowerCase()}, здесь появится итог: сколько родилось и сколько сохранилось.`} />
         ) : (
           <div className="list">
+            {seas.length > 1 && <Compare seas={seas} word={word} />}
             {seas.map((s) => (
-              <div key={s.from} className="card season">
+              <div key={s.id ?? s.from} className="card season">
                 <h2>{seasonTitle(word, s)}</h2>
-                <div className="pill-note">{s.from === s.to ? fmtDate(s.from, { year: true }) : `${fmtDate(s.from, { year: true })} – ${fmtDate(s.to, { year: true })}`}{s.mothers ? `, матерей: ${s.mothers}` : ''}</div>
+                <div className="pill-note">
+                  {s.manual
+                    ? `${fmtDate(s.from, { year: true })} – ${s.to ? fmtDate(s.to, { year: true }) : 'ещё идёт'}`
+                    : s.from === s.to ? fmtDate(s.from, { year: true }) : `${fmtDate(s.from, { year: true })} – ${fmtDate(s.to, { year: true })}`}
+                  {s.mothers ? `, матерей: ${s.mothers}` : ''}
+                </div>
+                <div className="season-src">
+                  <span className={`status ${s.manual ? 'status-active' : ''}`}>{s.manual ? 'Даты указаны вами' : 'Даты определены сами'}</span>
+                  <Button size="sm" icon="edit" onClick={() => setEdit(s.manual ? { id: s.id, species, from: s.from, to: s.to || '' } : { species, from: s.from, to: s.to })}>{s.manual ? 'Изменить' : 'Уточнить'}</Button>
+                </div>
                 <div className="metrics">
                   <div className="metric tone-green"><span>Родилось</span><b>{s.born}</b><small>{SPECIES[species].babyLabel.f.toLowerCase()}: {s.f}, {SPECIES[species].babyLabel.m.toLowerCase()}: {s.m}</small></div>
                   <div className="metric tone-red"><span>Пало</span><b>{s.stillborn + s.diedAfter}</b><small>мёртворожд.: {s.stillborn}, позже: {s.diedAfter}</small></div>
                 </div>
+                <div className="season-twins">Двоен: <b>{s.twins}</b>{s.triplets ? <>, троен: <b>{s.triplets}</b></> : null}{s.mothers ? <>, в среднем <b>{(s.born / s.mothers).toFixed(1).replace('.', ',')}</b> на матку</> : null}</div>
                 <div className="survival">
                   <div className="survival-bar"><i style={{ width: `${s.survival}%` }} /></div>
                   <span>Сохранность <b>{s.survival}%</b> ({s.alive} из {s.born})</span>
@@ -124,8 +139,10 @@ export default function Stats() {
               </div>
             ))}
           </div>
-        )
+        )}
+        </>
       )}
+      {edit && <SeasonSheet edit={edit} word={word} manual={manual || []} onClose={() => setEdit(null)} />}
 
       {mode === 'month' && (
         <>
@@ -150,5 +167,55 @@ export default function Stats() {
         </>
       )}
     </Screen>
+  );
+}
+
+// Сравнение сезонов между годами.
+function Compare({ seas, word }) {
+  return (
+    <div className="card compare">
+      <h2>Сравнение по годам</h2>
+      <div className="compare-table" role="table" aria-label={`Сравнение: ${word.toLowerCase()}`}>
+        <div className="compare-row compare-head" role="row"><span>Сезон</span><span>Род.</span><span>Пало</span><span>Двоен</span><span>Сохр.</span></div>
+        {seas.map((s) => (
+          <div key={s.id ?? s.from} className="compare-row" role="row">
+            <span>{s.from.slice(0, 4)}{seas.filter((x) => x.from.slice(0, 4) === s.from.slice(0, 4)).length > 1 ? `, ${MONTHS_SHORT[Number(s.from.slice(5, 7)) - 1]}` : ''}</span>
+            <b>{s.born}</b><b>{s.stillborn + s.diedAfter}</b><b>{s.twins + s.triplets}</b><b>{s.survival}%</b>
+            <i className="compare-bar"><i style={{ width: `${s.survival}%` }} /></i>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Даты начала и конца сезона. Конец можно не указывать, пока окот идёт.
+function SeasonSheet({ edit, word, manual, onClose }) {
+  const [from, setFrom] = useState(edit.from);
+  const [to, setTo] = useState(edit.to || '');
+  const { confirm } = useUi();
+  const run = useAction();
+  const bad = to && to < from;
+  const save = async () => {
+    const rec = { id: edit.id ?? Date.now(), species: edit.species, from, to: to || null };
+    const list = [...manual.filter((m) => m.id !== rec.id), rec];
+    if (await run(() => setSetting('seasons', list), 'Даты сохранены')) onClose();
+  };
+  const del = async () => {
+    if (await confirm({ icon: 'trash', danger: true, title: 'Убрать эти даты?', text: 'Рождения никуда не денутся: сезон снова будет определяться сам.', ok: 'Убрать' })) {
+      if (await run(() => setSetting('seasons', manual.filter((m) => m.id !== edit.id)), 'Даты убраны')) onClose();
+    }
+  };
+  return (
+    <Sheet open onClose={onClose} title={`${word}: даты`}>
+      <p className="muted">Статистика посчитает всех, кто родился с даты начала по дату окончания.</p>
+      <Field label="Начало" htmlFor="seasFrom"><input id="seasFrom" className="input" type="date" value={from} onChange={(e) => e.target.value && setFrom(e.target.value)} /></Field>
+      <Field label="Окончание" htmlFor="seasTo" hint="Пока сезон идёт, оставьте пустым." error={bad ? 'Окончание раньше начала.' : null}>
+        <input id="seasTo" className="input" type="date" min={from} value={to} onChange={(e) => setTo(e.target.value)} />
+      </Field>
+      {to && <Button onClick={() => setTo('')} icon="close">Сезон ещё идёт</Button>}
+      <Button kind="primary" size="lg" block icon="check" disabled={bad || !from} onClick={save}>Сохранить</Button>
+      {edit.id && <Button kind="ghost" icon="trash" onClick={del}>Убрать даты</Button>}
+    </Sheet>
   );
 }
