@@ -710,3 +710,14 @@ body { transition: background-color .4s; }
 .drug-row { display: flex; flex-direction: column; gap: 2px; padding: 12px 0; border-bottom: 2px dashed var(--soft); font-size: 18px; }
 .drug-row:last-child { border-bottom: 0; padding-bottom: 0; }
 .drug-row small { color: var(--ink-2); font-size: 16px; }
+
+/* ---------- Тавро и кличка ---------- */
+.ident { display: inline-flex; align-items: center; gap: 8px; flex: none; max-width: 100%; min-width: 0; }
+.brand { min-width: 36px; height: 36px; padding: 0 6px; display: inline-grid; place-items: center; border-radius: 9px; background: var(--earth); color: #fff; font-weight: 800; font-size: 20px; line-height: 1; flex: none; }
+.ident-name { font-weight: 800; font-size: 22px; line-height: 1.1; overflow-wrap: anywhere; }
+.ident-name.none { font-weight: 600; font-size: 17px; color: var(--ink-2); }
+.ident-sm .brand { min-width: 28px; height: 28px; font-size: 16px; border-radius: 7px; }
+.ident-sm .ident-name { font-size: 18px; }
+.ident-lg .brand { min-width: 60px; height: 60px; font-size: 34px; border-radius: 14px; }
+.ident-lg .ident-name { font-size: 38px; }
+.input-brand { max-width: 120px; text-align: center; font-weight: 800; font-size: 28px; }

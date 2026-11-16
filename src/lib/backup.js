@@ -1,4 +1,4 @@
-import { db, TABLES, setSetting } from './db.js';
+import { db, TABLES, setSetting, migrate } from './db.js';
 import { today } from './format.js';
 
 const WEEK = 7 * 24 * 3600 * 1000;
@@ -116,5 +116,8 @@ export async function restoreBackup(data) {
       else if (data.tables[t]?.length) await db[t].bulkAdd(data.tables[t]);
     }
     await db.settings.put({ key: 'lastBackupAt', value: Date.now() });
+    // копия могла быть сделана старой версией: проверим её данные заново
+    if (!(data.tables.settings || []).some((r) => r.key === 'dataVersion')) await db.settings.delete('dataVersion');
   });
+  await migrate();
 }

@@ -13,7 +13,7 @@ import '@fontsource/onest/latin-700.css';
 import '@fontsource/onest/latin-800.css';
 import './styles.css';
 import App from './App.jsx';
-import { askPersistentStorage } from './lib/db.js';
+import { askPersistentStorage, migrate } from './lib/db.js';
 import { applySeason, seasonByDate } from './lib/season.js';
 
 applySeason(seasonByDate());
@@ -22,8 +22,11 @@ applySeason(seasonByDate());
 if (!import.meta.env.VITE_NO_SW) registerSW({ immediate: true });
 askPersistentStorage();
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+// Сначала дописываем новые поля в данные старой версии, потом рисуем экран.
+migrate().catch((e) => console.error('migrate', e)).finally(() => {
+  createRoot(document.getElementById('root')).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+});

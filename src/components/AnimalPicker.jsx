@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { SPECIES, SPECIES_LIST } from '../lib/domain.js';
-import { filterAnimals } from '../lib/data.js';
+import { filterAnimals, matchesExactly } from '../lib/data.js';
 import { heads } from '../lib/format.js';
-import { Chips, TagInput, Button } from './ui.jsx';
+import { Chips, IdInput, Button } from './ui.jsx';
 import AnimalRow from './AnimalRow.jsx';
 import Icon from './Icon.jsx';
 
@@ -26,9 +26,9 @@ export default function AnimalPicker({ animals, selected, onChange, species: loc
 
   const markTag = () => {
     if (!tag) return;
-    const hits = pool.filter((a) => a.tag === tag && (!species || a.species === species));
-    if (hits.length === 0) setMsg({ bad: true, text: `Бирки ${tag} нет среди животных на хозяйстве` });
-    else if (hits.length > 1) setMsg({ bad: true, text: `Бирка ${tag} есть у разных видов. Выберите вид выше.` });
+    const hits = pool.filter((a) => matchesExactly(a, tag) && (!species || a.species === species));
+    if (hits.length === 0) setMsg({ bad: true, text: `${tag}: такого нет среди животных на хозяйстве` });
+    else if (hits.length > 1) setMsg({ bad: true, text: `${tag} есть у разных видов. Выберите вид ниже.` });
     else {
       const a = hits[0];
       const had = selected.has(a.id);
@@ -55,7 +55,7 @@ export default function AnimalPicker({ animals, selected, onChange, species: loc
     <div className="picker">
       {hint && <p className="muted">{hint}</p>}
       <div className="picker-tag">
-        <TagInput id="pickTag" value={tag} onChange={(v) => { setTag(v); setMsg(null); }} onEnter={markTag} placeholder="Номер бирки" />
+        <IdInput id="pickTag" value={tag} onChange={(v) => { setTag(v); setMsg(null); }} onEnter={markTag} placeholder="Номер" />
         <Button kind="dark" icon="check" onClick={markTag} disabled={!tag}>Отметить</Button>
       </div>
       {msg && <div className={`picker-msg ${msg.bad ? 'bad' : ''}`}><Icon name={msg.bad ? 'warning' : 'check'} />{msg.text}</div>}

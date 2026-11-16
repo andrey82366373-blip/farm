@@ -28,7 +28,8 @@ export async function loadDemo() {
   await db.transaction('rw', db.animals, db.events, db.sales, db.finance, db.counts, db.feeds, db.feedLog, async () => {
     const A = async (x) => db.animals.add({
       tag: '', sex: 'f', birthDate: null, birthApprox: false, motherId: null, motherTag: null, color: '', notes: '',
-      hasPhoto: false, status: 'active', outDate: null, createdAt: Date.now(), ...x, ...D,
+      hasPhoto: false, status: 'active', outDate: null, createdAt: Date.now(), name: '', chip: '',
+      brand: x.species === 'sheep' ? '' : 'В', ...x, ...D,
     });
     const E = (x) => db.events.add({ data: {}, ...x, ...D });
 
@@ -143,20 +144,21 @@ export async function loadDemo() {
     await E({ animalId: ewes[7].id, type: 'vet', date: `${y}-06-14`, data: { kind: 'treatment', drug: 'Окситетрациклин', note: 'Копытная гниль, 5 дней' } });
 
     /* ---------- Коровы ---------- */
-    await A({ species: 'cow', tag: '1', sex: 'm', group: 'bull', birthDate: `${y - 5}-04-10`, birthApprox: true, color: 'чёрно-пёстрый' });
+    await A({ species: 'cow', name: 'Буран', sex: 'm', group: 'bull', birthDate: `${y - 5}-04-10`, birthApprox: true, color: 'чёрно-пёстрый' });
     const cows = [];
     for (let i = 0; i < 7; i++) {
-      const id = await A({ species: 'cow', tag: String(11 + i), group: 'cow', birthDate: `${y - 3 - (i % 5)}-0${3 + (i % 5)}-12`, birthApprox: i % 3 === 0, color: pick(['рыжая', 'чёрно-пёстрая', 'бурая', 'рыжая, белая звезда']) });
-      cows.push({ id, tag: String(11 + i) });
+      const cowName = ['Зорька', 'Милка', 'Ночка', 'Белка', 'Марта', 'Ромашка', 'Звёздочка'][i];
+      const id = await A({ species: 'cow', name: cowName, group: 'cow', birthDate: `${y - 3 - (i % 5)}-0${3 + (i % 5)}-12`, birthApprox: i % 3 === 0, color: pick(['рыжая', 'чёрно-пёстрая', 'бурая', 'рыжая, белая звезда']) });
+      cows.push({ id, tag: cowName });
     }
-    await A({ species: 'cow', tag: '21', group: 'heifer', birthDate: `${y - 1}-04-02`, motherId: cows[0].id, motherTag: '11', color: 'рыжая' });
-    await A({ species: 'cow', tag: '22', group: 'heifer', birthDate: `${y - 1}-05-19`, motherId: cows[2].id, motherTag: '13', color: 'бурая' });
-    await A({ species: 'cow', tag: '23', group: 'netel', birthDate: `${y - 2}-04-25`, motherId: cows[3].id, motherTag: '14', color: 'чёрно-пёстрая', notes: 'Покрыта в феврале' });
-    await A({ species: 'cow', tag: '41', sex: 'm', group: 'steer', birthDate: `${y - 1}-03-08`, motherId: cows[1].id, motherTag: '12', color: 'рыжий' });
+    await A({ species: 'cow', name: 'Майка', group: 'heifer', birthDate: `${y - 1}-04-02`, motherId: cows[0].id, motherTag: 'Зорька', color: 'рыжая' });
+    await A({ species: 'cow', name: 'Дымка', group: 'heifer', birthDate: `${y - 1}-05-19`, motherId: cows[2].id, motherTag: 'Ночка', color: 'бурая' });
+    await A({ species: 'cow', name: 'Вишня', tag: '23', group: 'netel', birthDate: `${y - 2}-04-25`, motherId: cows[3].id, motherTag: 'Белка', color: 'чёрно-пёстрая', notes: 'Покрыта в феврале' });
+    await A({ species: 'cow', name: 'Буян', sex: 'm', group: 'steer', birthDate: `${y - 1}-03-08`, motherId: cows[1].id, motherTag: 'Милка', color: 'рыжий' });
     // отёл этого года
     let calfTag = 31;
     for (const [i, date, sex] of [[0, `${y}-03-11`, 'f'], [1, `${y}-03-29`, 'm'], [2, `${y}-04-16`, 'm'], [4, `${y}-05-02`, 'f'], [5, `${y}-05-21`, 'm']]) {
-      const id = await A({ species: 'cow', tag: String(calfTag++), sex, group: 'calf', birthDate: date, motherId: cows[i].id, motherTag: cows[i].tag, color: pick(['рыжий', 'бурый', 'чёрно-пёстрый']) });
+      const id = await A({ species: 'cow', name: String(calfTag++), sex, group: 'calf', birthDate: date, motherId: cows[i].id, motherTag: cows[i].tag, color: pick(['рыжий', 'бурый', 'чёрно-пёстрый']) });
       await E({ animalId: id, type: 'birth', date, motherId: cows[i].id, data: { litter: 1 } });
       if (i === 4) {
         await db.animals.update(id, { status: 'dead', outDate: `${y}-05-30` });
@@ -178,12 +180,12 @@ export async function loadDemo() {
     }
 
     /* ---------- Лошади ---------- */
-    const mare = await A({ species: 'horse', tag: '1', group: 'mare', birthDate: `${y - 9}-05-01`, birthApprox: true, color: 'гнедая', notes: 'Спокойная, ходит под седлом' });
-    const mare2 = await A({ species: 'horse', tag: '2', group: 'mare', birthDate: `${y - 6}-04-20`, color: 'рыжая' });
-    await A({ species: 'horse', tag: '3', sex: 'm', group: 'stallion', birthDate: `${y - 7}-06-10`, birthApprox: true, color: 'вороной' });
+    const mare = await A({ species: 'horse', name: 'Гроза', group: 'mare', birthDate: `${y - 9}-05-01`, birthApprox: true, color: 'гнедая', notes: 'Спокойная, ходит под седлом' });
+    const mare2 = await A({ species: 'horse', name: 'Рыжуха', group: 'mare', birthDate: `${y - 6}-04-20`, color: 'рыжая' });
+    await A({ species: 'horse', name: 'Ворон', sex: 'm', group: 'stallion', birthDate: `${y - 7}-06-10`, birthApprox: true, color: 'вороной' });
     {
       const date = `${y}-05-14`;
-      const id = await A({ species: 'horse', tag: '4', sex: 'f', group: 'foal', birthDate: date, motherId: mare, motherTag: '1', color: 'гнедая' });
+      const id = await A({ species: 'horse', name: 'Искра', sex: 'f', group: 'foal', birthDate: date, motherId: mare, motherTag: 'Гроза', color: 'гнедая' });
       await E({ animalId: id, type: 'birth', date, motherId: mare, data: { litter: 1 } });
     }
 
@@ -192,12 +194,12 @@ export async function loadDemo() {
     const ewesActive = await db.animals.where({ species: 'sheep' }).filter((a) => a.demo && a.status === 'active' && a.group === 'ewe').toArray();
     for (const a of ewesActive.slice(0, 30)) await M(a.id, addDays(T, -24), { sire: '1' });
     await M(ewesActive[32].id, addDays(T, -152), { sire: '2', note: 'Покрыта раньше остальных' });
-    await M(cows[3].id, addDays(T, 12 - 283), { sire: '1' });
-    const netel = await db.animals.where({ species: 'cow', tag: '23' }).first();
+    await M(cows[3].id, addDays(T, 12 - 283), { sire: 'Буран' });
+    const netel = await db.animals.where({ species: 'cow' }).filter((a) => a.name === 'Вишня').first();
     await M(netel.id, addDays(T, 17 - 283), { note: 'Искусственное осеменение' });
-    await M(cows[5].id, addDays(T, -95), { sire: '1' });
-    await M(mare, addDays(T, -165), { sire: '3' });
-    await M(mare2, addDays(T, -200), { sire: '3', failed: true });
+    await M(cows[5].id, addDays(T, -95), { sire: 'Буран' });
+    await M(mare, addDays(T, -165), { sire: 'Ворон' });
+    await M(mare2, addDays(T, -200), { sire: 'Ворон', failed: true });
 
     /* ---------- Корма ---------- */
     // пустые корма по умолчанию (если раздел уже открывали) заменяем примерными

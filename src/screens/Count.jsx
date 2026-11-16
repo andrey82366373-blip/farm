@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, saveCount, deleteCount } from '../lib/db.js';
-import { useAnimals, herdSummary } from '../lib/data.js';
+import { useAnimals, herdSummary, matchesExactly } from '../lib/data.js';
 import { SPECIES, groupOf, tagCompare } from '../lib/domain.js';
 import { today, fmtDate, plural } from '../lib/format.js';
 import { go, back } from '../lib/router.js';
-import { Screen, Button, Field, Chips, SpeciesPicker, TagInput, Segmented, Empty, Section, useUi, useAction } from '../components/ui.jsx';
+import { Screen, Button, Field, Chips, SpeciesPicker, IdInput, Segmented, Empty, Section, useUi, useAction } from '../components/ui.jsx';
 import Icon from '../components/Icon.jsx';
 import AnimalRow from '../components/AnimalRow.jsx';
 
@@ -182,8 +182,8 @@ export function CountResult() {
   const toggle = (id) => { const s = new Set(seen); s.has(id) ? s.delete(id) : s.add(id); setSeen(s); };
   const mark = () => {
     if (!tag) return;
-    const a = list.find((x) => x.tag === tag);
-    if (!a) setMsg({ bad: true, text: `Бирки ${tag} нет в этой группе` });
+    const a = list.find((x) => matchesExactly(x, tag));
+    if (!a) setMsg({ bad: true, text: `${tag}: такого нет в этой группе` });
     else if (seen.has(a.id)) setMsg({ bad: false, text: `${tag} уже отмечена` });
     else { toggle(a.id); vibrate(15); setMsg({ bad: false, text: `${tag}: видел` }); }
     setTag('');
@@ -227,7 +227,7 @@ export function CountResult() {
       {marking && (
         <Section title={`Видел: ${seen.size} из ${expected}`}>
           <div className="picker-tag">
-            <TagInput id="seenTag" value={tag} onChange={(x) => { setTag(x); setMsg(null); }} onEnter={mark} placeholder="Номер бирки" autoFocus />
+            <IdInput id="seenTag" value={tag} onChange={(x) => { setTag(x); setMsg(null); }} onEnter={mark} placeholder="Номер" autoFocus />
             <Button kind="dark" icon="check" onClick={mark} disabled={!tag}>Видел</Button>
           </div>
           {msg && <div className={`picker-msg ${msg.bad ? 'bad' : ''}`}><Icon name={msg.bad ? 'warning' : 'check'} />{msg.text}</div>}

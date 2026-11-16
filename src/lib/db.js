@@ -1,5 +1,5 @@
 import Dexie from 'dexie';
-import { SPECIES, groupOf } from './domain.js';
+import { SPECIES, groupOf, usesBrand, DEFAULT_BRAND } from './domain.js';
 import { today } from './format.js';
 
 // Все данные лежат в памяти телефона (IndexedDB). Поле demo: 1 есть только
@@ -70,18 +70,53 @@ function assertUniqueInBatch(species, tags) {
   }
 }
 
+// Кличка (или номер) тоже не должна повторяться внутри вида.
+export async function findNameOwner(species, name, exceptId) {
+  const n = String(name ?? '').trim().toLowerCase();
+  if (!n) return null;
+  const list = await db.animals.where({ species }).toArray();
+  return list.find((a) => a.status === 'active' && a.id !== exceptId && (a.name || '').trim().toLowerCase() === n) ?? null;
+}
+
+/* ---------- Обновление данных старой версии ---------- */
+// Тавро по умолчанию (меняется в настройках).
+let defaultBrand = DEFAULT_BRAND;
+export const getDefaultBrand = () => defaultBrand;
+export async function setDefaultBrand(v) {
+  defaultBrand = String(v || '').trim() || DEFAULT_BRAND;
+  await db.settings.put({ key: 'brand', value: defaultBrand });
+}
+
+// Запускается при каждом открытии. Ничего не удаляет и не меняет устройство
+// базы: только дописывает новые поля, поэтому старая версия приложения
+// по-прежнему открывает эти данные.
+export async function migrate() {
+  defaultBrand = (await db.settings.get('brand'))?.value || DEFAULT_BRAND;
+  const ver = (await db.settings.get('dataVersion'))?.value || 1;
+  if (ver >= 2) return;
+  await db.transaction('rw', db.animals, db.settings, async () => {
+    // коровам и лошадям без тавро ставим тавро по умолчанию; бирки остаются
+    await db.animals.filter((a) => usesBrand(a.species) && a.brand === undefined).modify({ brand: defaultBrand });
+    await db.settings.put({ key: 'dataVersion', value: 2 });
+  });
+}
+
 /* ---------- Животные ---------- */
 function normalizeAnimal(a) {
   const g = groupOf(a.species, a.group);
   return {
     species: a.species,
     tag: cleanTag(a.tag),
+    // кличка или номер, тавро и чип (у овец тавро не бывает)
+    name: String(a.name ?? '').trim(),
+    brand: usesBrand(a.species) ? String(a.brand ?? defaultBrand).trim() : '',
+    chip: cleanTag(a.chip),
     sex: g?.sex ?? a.sex ?? 'f',
     group: a.group,
     birthDate: a.birthDate || null,
     birthApprox: !!a.birthApprox,
     motherId: a.motherId ?? null,
-    motherTag: cleanTag(a.motherTag) || null,
+    motherTag: (usesBrand(a.species) ? String(a.motherTag ?? '').trim() : cleanTag(a.motherTag)) || null,
     color: (a.color || '').trim(),
     notes: (a.notes || '').trim(),
     hasPhoto: !!a.hasPhoto,
@@ -94,16 +129,21 @@ function normalizeAnimal(a) {
 
 // Находит мать по номеру бирки (сначала среди тех, кто на хозяйстве).
 export async function resolveMother(species, tag) {
-  const t = cleanTag(tag);
+  const t = String(tag ?? '').trim().toLowerCase();
   if (!t) return null;
-  const list = await db.animals.where({ species, tag: t }).toArray();
+  const list = (await db.animals.where({ species }).toArray())
+    .filter((a) => a.tag === t || (a.name || '').trim().toLowerCase() === t);
   return list.find((a) => a.status === 'active') ?? list[0] ?? null;
 }
 
 export async function saveAnimal(data, photoBlob) {
   return db.transaction('rw', db.animals, db.photos, db.events, async () => {
     const a = normalizeAnimal(data);
-    if (a.status === 'active') await assertTagFree(a.species, a.tag, data.id);
+    if (a.status === 'active') {
+      await assertTagFree(a.species, a.tag, data.id);
+      const twin = await findNameOwner(a.species, a.name, data.id);
+      if (twin) throw new FarmError(`«${twin.name}» уже есть на хозяйстве. Дайте другую кличку или номер.`);
+    }
     if (a.motherTag && !a.motherId) {
       const m = await resolveMother(a.species, a.motherTag);
       if (m) a.motherId = m.id;
@@ -188,7 +228,7 @@ export async function recordBirth({ species, motherId, motherTag, date, babies, 
       if (!b.stillborn) await assertTagFree(species, b.tag);
       const id = await db.animals.add(normalizeAnimal({
         species, sex: b.sex, group: SPECIES[species].newborn, tag: b.stillborn ? '' : b.tag,
-        birthDate: date, motherId: mother?.id ?? null, motherTag: mother?.tag ?? motherTag,
+        birthDate: date, motherId: mother?.id ?? null, motherTag: (mother ? (mother.name || mother.tag) : motherTag),
         color: b.color, status: b.stillborn ? 'dead' : 'active', outDate: b.stillborn ? date : null, ...demo,
       }));
       // у новорождённого пол хранится явно
@@ -329,7 +369,7 @@ export async function recordMating(ids, { date, sire, note, toNetel }) {
   return db.transaction('rw', db.animals, db.events, async () => {
     for (const id of ids) {
       const a = await db.animals.get(id);
-      await db.events.add(withDemo({ animalId: id, type: 'mating', date, data: { sire: cleanTag(sire) || '', note: note || '' } }, a));
+      await db.events.add(withDemo({ animalId: id, type: 'mating', date, data: { sire: String(sire || '').trim(), note: note || '' } }, a));
       if (toNetel && a.species === 'cow' && a.group === 'heifer') {
         await db.animals.update(id, { group: 'netel' });
         await db.events.add(withDemo({ animalId: id, type: 'group', date, data: { from: 'heifer', to: 'netel' } }, a));

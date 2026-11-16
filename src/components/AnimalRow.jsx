@@ -1,6 +1,6 @@
 import Icon from './Icon.jsx';
 import { SpeciesIcon, Tag } from './ui.jsx';
-import { STATUS, SPECIES, groupName, groupOf } from '../lib/domain.js';
+import { STATUS, SPECIES, groupName, groupOf, usesBrand } from '../lib/domain.js';
 import { fmtAge } from '../lib/format.js';
 
 export function animalSubtitle(a) {
@@ -8,6 +8,7 @@ export function animalSubtitle(a) {
   const age = fmtAge(a.birthDate, a.birthApprox);
   if (age) parts.push(age);
   if (a.color) parts.push(a.color);
+  if (usesBrand(a.species) && a.name && a.tag) parts.push(`бирка ${a.tag}`);
   return parts.join(', ');
 }
 
@@ -21,7 +22,7 @@ export default function AnimalRow({ a, onClick, selectable, selected, showSpecie
   return (
     <button className={`row press ${out ? 'out' : ''} ${selected ? 'selected' : ''}`} onClick={onClick} aria-pressed={selectable ? !!selected : undefined}>
       {selectable && <span className="check"><Icon name="check" /></span>}
-      <Tag tag={a.tag} />
+      <Tag a={a} />
       <span className="row-main">
         <span className="row-title">{groupName(a.species, a.group)}{groupOf(a.species, a.group)?.sex === null && SPECIES[a.species].babyLabel[a.sex] ? `, ${SPECIES[a.species].babyLabel[a.sex].toLowerCase()}` : ''}</span>
         <span className="row-sub">{animalSubtitle(a).split(', ').slice(1).join(', ') || ' '}</span>

@@ -56,7 +56,7 @@ export default function EventItem({ e, a, showAnimal, onClick, right }) {
       <span className="ev-main">
         <span className="ev-title">{title}</span>
         {showAnimal && a && (
-          <span className="ev-animal"><Tag tag={a.tag} size="sm" /> {SPECIES[a.species].one.toLowerCase()}, {groupName(a.species, a.group).toLowerCase()}</span>
+          <span className="ev-animal"><Tag a={a} size="sm" /> {SPECIES[a.species].one.toLowerCase()}, {groupName(a.species, a.group).toLowerCase()}</span>
         )}
         {sub && <span className="ev-sub">{sub}</span>}
       </span>

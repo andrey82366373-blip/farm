@@ -70,7 +70,7 @@ export default function Home() {
     const one = g.items.length === 1;
     todos.push({
       key: `due-${g.species}-${g.from}`, when: dueLabel(first.daysLeft), cls: first.daysLeft <= 7 ? 'now' : 'soon',
-      what: one ? `${SPECIES[g.species].birthWord}: бирка ${first.animal.tag || 'без номера'}` : `${SPECIES[g.species].birthWord}: ${heads(g.items.length)}`,
+      what: one ? `${SPECIES[g.species].birthWord}: ${first.animal.name || (first.animal.tag ? 'бирка ' + first.animal.tag : 'без номера')}` : `${SPECIES[g.species].birthWord}: ${heads(g.items.length)}`,
       who: first.daysLeft < 0 ? `ждали ${fmtDate(first.due)}, проверьте` : g.from === g.to ? `ожидается ${fmtDate(g.from)}` : `ожидается ${fmtDate(g.from)} – ${fmtDate(g.to)}`,
       onClick: () => go(one ? `/animal/${first.animal.id}` : '/calendar'),
     });
@@ -92,11 +92,11 @@ export default function Home() {
 
       <main className="content">
         {q && (
-          <Section title={found.length ? 'Нашлось' : `Бирки ${q} нет`}>
+          <Section title={found.length ? 'Нашлось' : `«${q}» не нашлось`}>
             <div className="list">
               {found.map((a) => <AnimalRow key={a.id} a={a} onClick={() => go(`/animal/${a.id}`)} />)}
             </div>
-            {!found.length && <Button icon="plus" onClick={() => go(`/animal/new?tag=${q}`)}>Добавить животное с биркой {q}</Button>}
+            {!found.length && <Button icon="plus" onClick={() => go(/^\d+$/.test(q) ? `/animal/new?tag=${q}` : `/animal/new?species=cow&name=${encodeURIComponent(q)}`)}>Добавить: {q}</Button>}
           </Section>
         )}
 

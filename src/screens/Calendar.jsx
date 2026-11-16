@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, recordMating, setSetting } from '../lib/db.js';
+import { db, recordMating, setSetting, getDefaultBrand, setDefaultBrand } from '../lib/db.js';
 import { useAnimals } from '../lib/data.js';
 import { SPECIES, SPECIES_LIST, GESTATION_DEFAULT, isBreeding } from '../lib/domain.js';
 import { today, fmtDate, fmtMonth, addDays, daysBetween, plural, heads } from '../lib/format.js';
 import { useGestation, useMatingEvents, pregnancies } from '../lib/repro.js';
 import { go, back } from '../lib/router.js';
-import { Screen, Button, Field, DateField, PickedSummary, TagInput, Segmented, Section, Empty, Tag, useUi, useAction } from '../components/ui.jsx';
+import { Screen, Button, Field, DateField, PickedSummary, IdInput, Segmented, Section, Empty, Tag, useUi, useAction } from '../components/ui.jsx';
 import Icon from '../components/Icon.jsx';
 import { PickStep, useIdsFromQuery } from './EventForms.jsx';
 
@@ -58,8 +58,8 @@ export function MatingForm() {
             </div>
           ))}
         </div>
-        <Field label="Самец (номер бирки)" hint="Если важно, от кого. Можно не указывать." htmlFor="sire">
-          <TagInput id="sire" value={sire} onChange={setSire} placeholder="Бирка самца" />
+        <Field label="Самец (номер или кличка)" hint="Если важно, от кого. Можно не указывать." htmlFor="sire">
+          <IdInput id="sire" value={sire} onChange={setSire} placeholder="Номер или кличка" />
         </Field>
         {heifers > 0 && (
           <Field label={`Тёлок среди выбранных: ${heifers}. Перевести их в нетели?`}>
@@ -201,8 +201,8 @@ function DueGroup({ items }) {
       </div>
       <div className="picked-tags">
         {items.map((x) => (
-          <button key={x.animal.id} className="press tag-btn" onClick={() => go(`/animal/${x.animal.id}`)} aria-label={`Открыть ${x.animal.tag}`}>
-            <Tag tag={x.animal.tag} size="sm" />
+          <button key={x.animal.id} className="press tag-btn" onClick={() => go(`/animal/${x.animal.id}`)} aria-label={`Открыть ${x.animal.name || x.animal.tag}`}>
+            <Tag a={x.animal} size="sm" />
           </button>
         ))}
       </div>
@@ -215,7 +215,7 @@ export function DueRow({ p }) {
   const late = p.daysLeft < 0;
   return (
     <button className="row press" onClick={() => go(`/animal/${a.id}`)}>
-      <Tag tag={a.tag} />
+      <Tag a={a} />
       <span className="row-main">
         <span className="row-title">{SPECIES[a.species].birthWord}: {fmtDate(p.due)}</span>
         <span className="row-sub">{late ? `срок прошёл ${-p.daysLeft} ${dayWord(-p.daysLeft)} назад, проверьте` : p.daysLeft === 0 ? 'сегодня' : `через ${p.daysLeft} ${dayWord(p.daysLeft)}`}</span>
@@ -230,7 +230,7 @@ export function PregnancyBlock({ animal, p, onFailed }) {
   const sp = SPECIES[animal.species];
   if (!p) {
     return (
-      <Button icon="heart" block onClick={() => go(`/event/mating?ids=${animal.id}`)}>Отметить {sp.matingWord.toLowerCase()}</Button>
+      <Button icon="heart" block onClick={() => go(`/event/mating?ids=${animal.id}`)}>Отметить {sp.matingWord === 'Случка' ? 'случку' : 'покрытие'}</Button>
     );
   }
   const late = p.daysLeft < 0;
@@ -248,7 +248,7 @@ export function PregnancyBlock({ animal, p, onFailed }) {
       </div>
       <div className="survival-bar preg-bar"><i style={{ width: `${Math.round(p.progress * 100)}%` }} /></div>
       <div className="btn-row">
-        <Button size="sm" icon="birth" onClick={() => go(`/birth?species=${animal.species}&mother=${animal.tag}`)}>Родила</Button>
+        <Button size="sm" icon="birth" onClick={() => go(`/birth?species=${animal.species}&mother=${encodeURIComponent(animal.name || animal.tag)}`)}>Родила</Button>
         <Button size="sm" icon="close" onClick={onFailed}>Пустая</Button>
       </div>
     </div>
@@ -260,6 +260,7 @@ export function Settings() {
   const gestation = useGestation();
   const [vals, setVals] = useState(null);
   const run = useAction();
+  const [brand, setBrand] = useState(getDefaultBrand());
   const v = vals ?? gestation;
   const changed = SPECIES_LIST.some((s) => Number(v[s.key]) !== gestation[s.key]);
 
@@ -281,6 +282,11 @@ export function Settings() {
           </Field>
         ))}
         <Button kind="ghost" onClick={() => setVals({ ...GESTATION_DEFAULT })}>Вернуть обычные сроки</Button>
+      </Section>
+      <Section title="Тавро">
+        <Field label="Тавро для новых коров и лошадей" htmlFor="defBrand" hint="Буква или знак клейма. У каждого животного его можно поменять в карточке.">
+          <input id="defBrand" className="input input-brand" maxLength={4} value={brand} onChange={(e) => setBrand(e.target.value)} onBlur={() => run(() => setDefaultBrand(brand), 'Тавро сохранено')} />
+        </Field>
       </Section>
     </Screen>
   );

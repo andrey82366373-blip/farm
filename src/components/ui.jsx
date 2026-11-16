@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import { createPortal } from 'react-dom';
 import Icon from './Icon.jsx';
 import { back } from '../lib/router.js';
-import { SPECIES } from '../lib/domain.js';
+import { SPECIES, usesBrand, noIdText } from '../lib/domain.js';
 
 /* ---------- Каркас экрана ---------- */
 export function TopBar({ title, sub, backTo = '/', right }) {
@@ -41,7 +41,18 @@ export function Button({ children, icon, kind = 'plain', size, block, className 
 }
 
 /* ---------- Бирка ---------- */
-export function Tag({ tag, size, className = '' }) {
+// Бирка животного. Для коров и лошадей: тавро и кличка (или номер).
+export function Tag({ tag, a, size, className = '' }) {
+  if (a && usesBrand(a.species)) {
+    const label = (a.name || '').trim() || a.tag;
+    return (
+      <span className={`ident ${size ? 'ident-' + size : ''} ${className}`}>
+        {a.brand && <span className="brand" title="Тавро">{a.brand}</span>}
+        <span className={`ident-name ${label ? '' : 'none'}`}>{label || noIdText(a.species)}</span>
+      </span>
+    );
+  }
+  if (a) tag = a.tag;
   if (!tag) return <span className={`tagbadge tagbadge-none ${size ? 'tagbadge-' + size : ''} ${className}`}>без бирки</span>;
   return <span className={`tagbadge ${size ? 'tagbadge-' + size : ''} ${className}`}>{tag}</span>;
 }
@@ -137,19 +148,39 @@ export function TagInput({ value, onChange, placeholder = 'Номер бирки
   );
 }
 
-export function SearchBox({ value, onChange, placeholder = 'Найти по бирке', autoFocus, onEnter, id = 'search' }) {
+// Поле для номера или клички: цифры и буквы (подходит и сканер-клавиатура).
+export function IdInput({ value, onChange, placeholder = 'Номер или кличка', autoFocus, id, onEnter, numeric, inputRef }) {
+  return (
+    <input
+      ref={inputRef}
+      id={id}
+      className="input input-tag"
+      inputMode={numeric ? 'numeric' : 'text'}
+      autoComplete="off"
+      autoCapitalize="sentences"
+      enterKeyHint="done"
+      placeholder={placeholder}
+      value={value}
+      autoFocus={autoFocus}
+      onChange={(e) => onChange(e.target.value.replace(/^\s+/, ''))}
+      onKeyDown={(e) => { if (e.key === 'Enter' && onEnter) onEnter(); }}
+    />
+  );
+}
+
+export function SearchBox({ value, onChange, placeholder = 'Бирка, номер или кличка', autoFocus, onEnter, id = 'search' }) {
   return (
     <div className="searchbox">
       <Icon name="search" />
       <input
         id={id}
-        inputMode="numeric"
-        pattern="[0-9]*"
+        inputMode="search"
+        enterKeyHint="search"
         autoComplete="off"
         placeholder={placeholder}
         value={value}
         autoFocus={autoFocus}
-        onChange={(e) => onChange(e.target.value.replace(/\D/g, ''))}
+        onChange={(e) => onChange(e.target.value.replace(/^\s+/, ''))}
         onKeyDown={(e) => { if (e.key === 'Enter' && onEnter) onEnter(); }}
       />
       {value && (
@@ -299,7 +330,7 @@ export function PickedSummary({ animals, onEdit, title }) {
         {onEdit && <Button size="sm" icon="edit" onClick={onEdit}>Изменить</Button>}
       </div>
       <div className="picked-tags">
-        {shown.map((a) => <Tag key={a.id} tag={a.tag} size="sm" />)}
+        {shown.map((a) => <Tag key={a.id} a={a} size="sm" />)}
         {animals.length > shown.length && <span className="muted">и ещё {animals.length - shown.length}</span>}
       </div>
     </div>

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { recordBirth, resolveMother, findTagOwner } from '../lib/db.js';
-import { SPECIES, groupOf, groupName } from '../lib/domain.js';
+import { SPECIES, groupOf, groupName, usesBrand, idLabel } from '../lib/domain.js';
 import { today, fmtAge, plural } from '../lib/format.js';
 import { go, useRoute } from '../lib/router.js';
-import { Screen, Field, TagInput, Segmented, DateField, SpeciesPicker, Button, Tag, useAction } from '../components/ui.jsx';
+import { Screen, Field, TagInput, IdInput, Segmented, DateField, SpeciesPicker, Button, Tag, useAction } from '../components/ui.jsx';
 import Icon from '../components/Icon.jsx';
 
 const newBaby = (sex = 'f') => ({ sex, tag: '', color: '', stillborn: false });
@@ -74,19 +74,19 @@ export default function Birth() {
       <div className="form">
         <Field label="Вид"><SpeciesPicker value={species} onChange={(s) => { setSpecies(s); setDupes({}); }} /></Field>
 
-        <Field label="Мать (номер бирки)" htmlFor="motherTag" hint={!motherTag ? 'Если мать неизвестна, оставьте пустым.' : null}>
-          <TagInput id="motherTag" value={motherTag} onChange={setMotherTag} placeholder="Бирка матери" />
+        <Field label={usesBrand(species) ? 'Мать (кличка или номер)' : 'Мать (номер бирки)'} htmlFor="motherTag" hint={!motherTag ? 'Если мать неизвестна, оставьте пустым.' : null}>
+          <IdInput id="motherTag" numeric={!usesBrand(species)} value={motherTag} onChange={(v) => setMotherTag(usesBrand(species) ? v : v.replace(/\D/g, ''))} placeholder={usesBrand(species) ? 'Кличка матери' : 'Бирка матери'} />
           {motherTag && (mother ? (
             motherBad ? (
-              <div className="mother-found bad"><Icon name="warning" />Бирка {mother.tag}: {groupName(species, mother.group).toLowerCase()}{mother.status !== 'active' ? ', не на хозяйстве' : ''}. Проверьте номер.</div>
+              <div className="mother-found bad"><Icon name="warning" />{idLabel(mother)}: {groupName(species, mother.group).toLowerCase()}{mother.status !== 'active' ? ', не на хозяйстве' : ''}. Проверьте номер.</div>
             ) : (
               <div className="mother-found">
-                <Tag tag={mother.tag} />
+                <Tag a={mother} />
                 <span>{groupName(species, mother.group)}{mother.birthDate ? `, ${fmtAge(mother.birthDate, mother.birthApprox)}` : ''}</span>
               </div>
             )
           ) : (
-            <div className="field-hint">Такой бирки нет в списке. Номер матери просто сохранится в карточках детёнышей.</div>
+            <div className="field-hint">В списке такой нет. Мать просто запишется в карточки детёнышей как написано.</div>
           ))}
         </Field>
 

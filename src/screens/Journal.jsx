@@ -116,7 +116,7 @@ function GroupItem({ g, byId, open, onToggle }) {
           <span className="ev-sub">{kinds}{sub ? `, ${sub}` : ''}</span>
           {!open && (
             <span className="picked-tags">
-              {animals.slice(0, 10).map((a) => <Tag key={a.id} tag={a.tag} size="sm" />)}
+              {animals.slice(0, 10).map((a) => <Tag key={a.id} a={a} size="sm" />)}
               {animals.length > 10 && <span className="muted">и ещё {animals.length - 10}</span>}
             </span>
           )}
@@ -127,7 +127,7 @@ function GroupItem({ g, byId, open, onToggle }) {
         <div className="ev-group-list">
           {animals.map((a) => (
             <button key={a.id} className="ev-group-row press" onClick={() => go(`/animal/${a.id}`)}>
-              <Tag tag={a.tag} size="sm" />
+              <Tag a={a} size="sm" />
               <span>{groupName(a.species, a.group)}</span>
               <Icon name="chevron" />
             </button>

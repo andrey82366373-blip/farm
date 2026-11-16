@@ -17,7 +17,7 @@ export default function MaturitySheet({ group, onClose }) {
   const moveOne = async (d, to) => {
     const ok = await confirm({
       icon: 'arrowUp', title: `Перевести в ${many(to)}?`,
-      text: `${sp.one} с биркой ${d.animal.tag || '(без бирки)'} станет: ${one(to)}.`, ok: 'Перевести',
+      text: `${sp.one} ${d.animal.name || d.animal.tag || ''} станет: ${one(to)}.`, ok: 'Перевести',
     });
     if (ok) await run(() => changeGroup([d.animal.id], to), `Готово: ${one(to)}`);
   };
@@ -50,7 +50,7 @@ export default function MaturitySheet({ group, onClose }) {
         {group.items.map((d) => (
           <div key={d.animal.id} className="card mat-item">
             <button className="mat-head press" onClick={() => { onClose(); go(`/animal/${d.animal.id}`); }}>
-              <Tag tag={d.animal.tag} />
+              <Tag a={d.animal} />
               <span className="row-main">
                 <span className="row-title">{sp.babyLabel[d.animal.sex] && group.from === sp.newborn ? sp.babyLabel[d.animal.sex] : groupOf(group.species, group.from)?.one}</span>
                 <span className="row-sub">{fmtAge(d.animal.birthDate, d.animal.birthApprox) || 'возраст не указан'}</span>

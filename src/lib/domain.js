@@ -131,12 +131,26 @@ export function sexLabel(species, sex, group) {
   return sex === 'f' ? 'Самка' : sex === 'm' ? 'Самец' : '';
 }
 
-// Сортировка бирок как чисел: 7, 12, 105
+// У коров и лошадей вместо бирки тавро и кличка (или номер).
+export const DEFAULT_BRAND = 'В';
+export const usesBrand = (species) => species === 'cow' || species === 'horse';
+
+// Как назвать животное в тексте: кличка, иначе номер бирки.
+export function idLabel(a) {
+  return (a?.name || '').trim() || a?.tag || '';
+}
+export function noIdText(species) {
+  return usesBrand(species) ? 'без клички' : 'без бирки';
+}
+
+// Сортировка: номера как числа (7, 12, 105), клички по алфавиту.
 export function tagCompare(a, b) {
-  const ta = a.tag || '', tb = b.tag || '';
+  const ta = idLabel(a), tb = idLabel(b);
   if (!ta && !tb) return (a.id ?? 0) - (b.id ?? 0);
   if (!ta) return 1;
   if (!tb) return -1;
-  const d = Number(ta) - Number(tb);
-  return d !== 0 ? d : ta.localeCompare(tb);
+  const na = /^\d+$/.test(ta), nb = /^\d+$/.test(tb);
+  if (na && nb) return Number(ta) - Number(tb) || ta.localeCompare(tb);
+  if (na !== nb) return na ? -1 : 1;
+  return ta.localeCompare(tb, 'ru');
 }

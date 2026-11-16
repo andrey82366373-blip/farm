@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, deleteAnimal, assignTag, undoOut, addNote, changeGroup, deleteEvent, byDateDesc, markMatingFailed } from '../lib/db.js';
-import { SPECIES, groupName, sexLabel, STATUS, isBreeding } from '../lib/domain.js';
+import { SPECIES, groupName, sexLabel, STATUS, isBreeding, usesBrand, idLabel, noIdText } from '../lib/domain.js';
 import { fmtAge, fmtDate, today, plural } from '../lib/format.js';
 import { go, back } from '../lib/router.js';
 import { Screen, Tag, SpeciesIcon, Button, Section, Sheet, Field, TagInput, Chips, Empty, useUi, useAction } from '../components/ui.jsx';
@@ -90,23 +90,26 @@ export default function AnimalView({ id }) {
 
   return (
     <Screen
-      title={`${sp.one}${a.tag ? ' ' + a.tag : ''}`}
+      title={`${sp.one}${idLabel(a) ? ' ' + idLabel(a) : ''}`}
       sub={groupName(a.species, a.group)}
       backTo="/animals"
       right={<button className="icon-btn press" onClick={() => go(`/animal/${id}/edit`)} aria-label="Изменить"><Icon name="edit" /></button>}
     >
       <div className="card animal-hero">
-        {photo && <img className="animal-photo" src={photo} alt={`Фото: ${sp.one.toLowerCase()} ${a.tag}`} />}
+        {photo && <img className="animal-photo" src={photo} alt={`Фото: ${sp.one.toLowerCase()} ${idLabel(a)}`} />}
         <div className="animal-id">
-          <Tag tag={a.tag} size="lg" />
+          <Tag a={a} size="lg" />
           <SpeciesIcon species={a.species} size="lg" />
         </div>
         <div className="animal-status">
           <StatusBadge status={a.status} />
           {a.outDate && <span className="muted">{fmtDate(a.outDate, { year: true })}</span>}
         </div>
-        {!a.tag && active && <Button kind="tag" icon="tag" block onClick={() => setSheet('tag')}>Присвоить бирку</Button>}
+        {!a.tag && active && !usesBrand(a.species) && <Button kind="tag" icon="tag" block onClick={() => setSheet('tag')}>Присвоить бирку</Button>}
         <dl className="kv">
+          {usesBrand(a.species) && <><dt>Тавро</dt><dd>{a.brand || 'нет'}</dd></>}
+          {usesBrand(a.species) && a.tag && <><dt>Бирка</dt><dd>{a.tag}</dd></>}
+          {a.chip && <><dt>Чип</dt><dd>{a.chip}</dd></>}
           <dt>Группа</dt><dd>{groupName(a.species, a.group)}</dd>
           <dt>Пол</dt><dd>{sexLabel(a.species, a.sex, a.group) || '—'}</dd>
           <dt>Возраст</dt><dd>{a.birthDate ? fmtAge(a.birthDate, a.birthApprox, a.outDate || today()) : 'не указан'}</dd>
@@ -114,8 +117,8 @@ export default function AnimalView({ id }) {
           <dt>Мать</dt>
           <dd>
             {mother ? (
-              <button className="link press" onClick={() => go(`/animal/${mother.id}`)}><Tag tag={mother.tag} size="sm" /> {groupName(mother.species, mother.group).toLowerCase()}</button>
-            ) : a.motherTag ? `бирка ${a.motherTag}` : 'неизвестна'}
+              <button className="link press" onClick={() => go(`/animal/${mother.id}`)}><Tag a={mother} size="sm" /> {groupName(mother.species, mother.group).toLowerCase()}</button>
+            ) : a.motherTag ? `${usesBrand(a.species) ? '' : 'бирка '}${a.motherTag}` : 'неизвестна'}
           </dd>
           {a.color && <><dt>Приметы</dt><dd>{a.color}</dd></>}
         </dl>
@@ -184,7 +187,7 @@ export default function AnimalView({ id }) {
                 <span className="ev-ico tone-green"><Icon name="birth" /></span>
                 <span className="ev-main">
                   <span className="ev-title">{sp.birthWord}: {e.list.length} {plural(e.list.length, 'детёныш', 'детёныша', 'детёнышей')}</span>
-                  <span className="ev-sub">{e.list.map((k) => `${sp.babyLabel[k.sex]?.toLowerCase() ?? ''} ${k.tag || 'без бирки'}${k.status === 'dead' ? ' (пал)' : ''}`).join(', ')}</span>
+                  <span className="ev-sub">{e.list.map((k) => `${sp.babyLabel[k.sex]?.toLowerCase() ?? ''} ${idLabel(k) || noIdText(k.species)}${k.status === 'dead' ? ' (пал)' : ''}`).join(', ')}</span>
                 </span>
                 <span className="ev-date">{fmtDate(e.date)}</span>
               </div>

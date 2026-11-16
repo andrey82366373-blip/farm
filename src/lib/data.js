@@ -41,10 +41,16 @@ export function filterAnimals(animals, { species, group, status = 'active', q })
   if (species) list = list.filter((a) => a.species === species);
   if (group) list = list.filter((a) => a.group === group);
   if (q) {
-    const exact = list.filter((a) => a.tag === q);
-    const starts = list.filter((a) => a.tag !== q && a.tag.startsWith(q));
-    const has = list.filter((a) => a.tag !== q && !a.tag.startsWith(q) && a.tag.includes(q));
-    return [...exact, ...starts.sort(tagCompare), ...has.sort(tagCompare)];
+    // ищем по бирке, кличке или номеру и по чипу
+    const s = String(q).trim().toLowerCase();
+    const rank = (a) => {
+      const keys = [a.tag, (a.name || '').toLowerCase(), a.chip || ''].filter(Boolean);
+      if (keys.some((k) => k === s)) return 0;
+      if (keys.some((k) => k.startsWith(s))) return 1;
+      if (keys.some((k) => k.includes(s))) return 2;
+      return 3;
+    };
+    return [0, 1, 2].flatMap((r) => list.filter((a) => rank(a) === r).sort(tagCompare));
   }
   return [...list].sort((a, b) => ((b.status === 'active') - (a.status === 'active')) || tagCompare(a, b));
 }

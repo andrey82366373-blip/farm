@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, saveAnimal, findTagOwner, resolveMother, cleanTag } from '../lib/db.js';
-import { SPECIES, groupOf, groupName } from '../lib/domain.js';
+import { db, saveAnimal, findTagOwner, findNameOwner, resolveMother, cleanTag, getDefaultBrand } from '../lib/db.js';
+import { SPECIES, groupOf, groupName, usesBrand } from '../lib/domain.js';
 import { today, toISO, parseISO, monthsBetween, fmtAge } from '../lib/format.js';
 import { go, back, useRoute } from '../lib/router.js';
-import { Screen, Field, TagInput, Chips, Segmented, SpeciesPicker, Button, useAction, useUi } from '../components/ui.jsx';
+import { Screen, Field, TagInput, IdInput, Chips, Segmented, SpeciesPicker, Button, useAction, useUi } from '../components/ui.jsx';
 import { shrinkPhoto, usePhoto, useBlobUrl } from '../lib/photo.js';
 
 function emptyForm(species = 'sheep', tag = '') {
   return {
     species, tag, group: SPECIES[species].groups[0].key, sex: 'f',
     birthMode: 'date', birthDate: '', approxYears: '', approxMonths: '',
-    motherTag: '', color: '', notes: '',
+    motherTag: '', color: '', notes: '', name: '', brand: getDefaultBrand(), chip: '',
   };
 }
 
@@ -23,7 +23,7 @@ function fromAnimal(a) {
     approxYears = String(Math.floor(m / 12) || '');
     approxMonths = String(m % 12 || '');
   }
-  return { ...emptyForm(a.species), ...a, birthMode, approxYears, approxMonths, birthDate: a.birthDate || '', motherTag: a.motherTag || '' };
+  return { ...emptyForm(a.species), ...a, name: a.name || '', brand: a.brand ?? getDefaultBrand(), chip: a.chip || '', birthMode, approxYears, approxMonths, birthDate: a.birthDate || '', motherTag: a.motherTag || '' };
 }
 
 function birthFromForm(f) {
@@ -42,7 +42,8 @@ function birthFromForm(f) {
 export default function AnimalForm({ id }) {
   const { query } = useRoute();
   const existing = useLiveQuery(() => (id ? db.animals.get(id) : null), [id]);
-  const [f, setF] = useState(() => emptyForm(query.species || 'sheep', query.tag || ''));
+  const [f, setF] = useState(() => ({ ...emptyForm(query.species || 'sheep', query.tag || ''), name: query.name || '' }));
+  const [nameOwner, setNameOwner] = useState(null);
   const [loaded, setLoaded] = useState(!id);
   const [photo, setPhoto] = useState(undefined); // undefined — не менялось, null — убрать
   const [tagOwner, setTagOwner] = useState(null);
@@ -62,6 +63,7 @@ export default function AnimalForm({ id }) {
   const set = (patch) => setF((x) => ({ ...x, ...patch }));
   const sp = SPECIES[f.species];
   const g = groupOf(f.species, f.group);
+  const brandSp = usesBrand(f.species);
 
   // Проверяем бирку и мать прямо во время ввода.
   useEffect(() => {
@@ -69,6 +71,11 @@ export default function AnimalForm({ id }) {
     findTagOwner(f.species, f.tag, id).then((o) => alive && setTagOwner(existing && existing.status !== 'active' ? null : o));
     return () => { alive = false; };
   }, [f.species, f.tag, id, existing]);
+  useEffect(() => {
+    let alive = true;
+    findNameOwner(f.species, f.name, id).then((o) => alive && setNameOwner(existing && existing.status !== 'active' ? null : o));
+    return () => { alive = false; };
+  }, [f.species, f.name, id, existing]);
   useEffect(() => {
     let alive = true;
     resolveMother(f.species, f.motherTag).then((m) => alive && setMother(m && m.id !== id ? m : null));
@@ -83,20 +90,21 @@ export default function AnimalForm({ id }) {
   };
 
   const save = async (next) => {
-    if (tagOwner) return;
+    if (tagOwner || nameOwner) return;
     setSaving(true);
     const data = {
       id: id || undefined, species: f.species, tag: f.tag, group: f.group,
+      name: f.name, brand: f.brand, chip: f.chip,
       sex: g?.sex ?? f.sex, ...birthFromForm(f),
       motherTag: f.motherTag, motherId: mother?.id ?? null,
       color: f.color, notes: f.notes, demo: existing?.demo,
     };
-    const newId = await run(() => saveAnimal(data, photo), id ? 'Изменения сохранены' : `Добавлено: ${sp.one.toLowerCase()} ${cleanTag(f.tag) || 'без бирки'}`);
+    const newId = await run(() => saveAnimal(data, photo), id ? 'Изменения сохранены' : `Добавлено: ${sp.one.toLowerCase()} ${f.name.trim() || cleanTag(f.tag) || ''}`);
     setSaving(false);
     if (!newId) return;
     if (next) {
       // «Сохранить и следующее»: оставляем вид и группу, очищаем остальное.
-      setF({ ...emptyForm(f.species), group: f.group, sex: f.sex });
+      setF({ ...emptyForm(f.species), group: f.group, sex: f.sex, brand: f.brand });
       setPhoto(undefined);
       window.scrollTo(0, 0);
     } else if (id) back(`/animal/${id}`);
@@ -110,13 +118,13 @@ export default function AnimalForm({ id }) {
   return (
     <Screen
       title={id ? 'Изменить' : 'Новое животное'}
-      sub={id ? `${sp.one}, бирка ${existing?.tag || 'нет'}` : null}
+      sub={id ? `${sp.one} ${existing?.name || existing?.tag || ''}` : null}
       backTo={id ? `/animal/${id}` : '/animals'}
       className="with-footer"
       footer={
         <>
-          <Button kind="primary" size="lg" block icon="check" disabled={saving || !!tagOwner} onClick={() => save(false)}>Сохранить</Button>
-          {!id && <Button kind="ghost" disabled={saving || !!tagOwner} onClick={() => save(true)}>Сохранить и добавить ещё</Button>}
+          <Button kind="primary" size="lg" block icon="check" disabled={saving || !!tagOwner || !!nameOwner} onClick={() => save(false)}>Сохранить</Button>
+          {!id && <Button kind="ghost" disabled={saving || !!tagOwner || !!nameOwner} onClick={() => save(true)}>Сохранить и добавить ещё</Button>}
         </>
       }
     >
@@ -127,11 +135,27 @@ export default function AnimalForm({ id }) {
           </Field>
         )}
 
+        {brandSp && (
+          <>
+            <Field
+              label="Кличка или номер"
+              htmlFor="name"
+              error={nameOwner ? `«${nameOwner.name}» уже есть на хозяйстве (${groupName(nameOwner.species, nameOwner.group).toLowerCase()}).` : null}
+              hint="То, по чему вы её различаете: Зорька, Рыжая, 7."
+            >
+              <IdInput id="name" value={f.name} onChange={(v) => set({ name: v })} placeholder="Кличка или номер" />
+            </Field>
+            <Field label="Тавро" htmlFor="brand" hint="Буква или знак клейма. Если тавра нет, сотрите.">
+              <input id="brand" className="input input-brand" value={f.brand} maxLength={4} onChange={(e) => set({ brand: e.target.value })} autoComplete="off" />
+            </Field>
+          </>
+        )}
+
         <Field
-          label="Номер бирки"
+          label={brandSp ? 'Номер бирки (если есть)' : 'Номер бирки'}
           htmlFor="tag"
           error={tagOwner ? `Бирка ${tagOwner.tag} уже есть у другого животного (${groupName(tagOwner.species, tagOwner.group).toLowerCase()}).` : null}
-          hint="Только цифры. Можно оставить пустым и присвоить бирку позже."
+          hint={brandSp ? 'Необязательно.' : 'Только цифры. Можно оставить пустым и присвоить бирку позже.'}
         >
           <TagInput id="tag" value={f.tag} onChange={(v) => set({ tag: v })} />
         </Field>
@@ -171,11 +195,11 @@ export default function AnimalForm({ id }) {
         </Field>
 
         <Field
-          label="Мать (номер бирки)"
+          label={brandSp ? 'Мать (кличка или номер)' : 'Мать (номер бирки)'}
           htmlFor="motherTag"
-          hint={f.motherTag ? (mother ? `Нашлась: ${groupName(mother.species, mother.group).toLowerCase()}${mother.birthDate ? ', ' + fmtAge(mother.birthDate, mother.birthApprox) : ''}` : 'Такой бирки нет в списке — сохраню просто номер.') : 'Если известна.'}
+          hint={f.motherTag ? (mother ? `Нашлась: ${groupName(mother.species, mother.group).toLowerCase()}${mother.birthDate ? ', ' + fmtAge(mother.birthDate, mother.birthApprox) : ''}` : 'В списке такой нет, сохраню как написано.') : 'Если известна.'}
         >
-          <TagInput id="motherTag" value={f.motherTag} onChange={(v) => set({ motherTag: v })} placeholder="Бирка матери" />
+          <IdInput id="motherTag" numeric={!brandSp} value={f.motherTag} onChange={(v) => set({ motherTag: brandSp ? v : v.replace(/\D/g, '') })} placeholder={brandSp ? 'Кличка матери' : 'Бирка матери'} />
         </Field>
 
         <Field label="Окрас, приметы" htmlFor="color">
@@ -184,6 +208,10 @@ export default function AnimalForm({ id }) {
 
         <Field label="Заметки" htmlFor="notes">
           <textarea id="notes" className="textarea" value={f.notes} onChange={(e) => set({ notes: e.target.value })} placeholder="Всё, что важно помнить" />
+        </Field>
+
+        <Field label="Номер чипа" htmlFor="chip" hint="Необязательно. Если животное чипировано.">
+          <TagInput id="chip" value={f.chip} onChange={(v) => set({ chip: v })} placeholder="Чип" />
         </Field>
 
         <Field label="Фото">

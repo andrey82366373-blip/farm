@@ -55,8 +55,8 @@ export default function Animals() {
         )}
         {animals && list.length === 0 ? (
           q ? (
-            <Empty icon="search" title={`Бирки ${q} не нашлось`} text="Проверьте номер или поменяйте фильтры выше.">
-              <Button icon="plus" onClick={() => go(`/animal/new?tag=${q}${species ? '&species=' + species : ''}`)}>Добавить с биркой {q}</Button>
+            <Empty icon="search" title={`«${q}» не нашлось`} text="Проверьте номер или поменяйте фильтры выше.">
+              <Button icon="plus" onClick={() => go(/^\d+$/.test(q) ? `/animal/new?tag=${q}${species ? '&species=' + species : ''}` : `/animal/new?species=${species && species !== 'sheep' ? species : 'cow'}&name=${encodeURIComponent(q)}`)}>Добавить: {q}</Button>
             </Empty>
           ) : (
             <Empty title="Здесь пока пусто" text="Добавьте животное кнопкой «Добавить» вверху." />

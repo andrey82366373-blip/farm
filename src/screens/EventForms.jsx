@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
 import { recordOut, recordPurchase, findTagOwner } from '../lib/db.js';
 import { useAnimals } from '../lib/data.js';
-import { SPECIES, DEATH_CAUSES, groupOf, causeLabel } from '../lib/domain.js';
+import { SPECIES, DEATH_CAUSES, groupOf, causeLabel, usesBrand } from '../lib/domain.js';
 import { today, toISO, parseISO, parseNum, heads, fmtRub } from '../lib/format.js';
 import { go, back, useRoute } from '../lib/router.js';
-import { Screen, Button, Field, Chips, Segmented, DateField, PickedSummary, SpeciesPicker, TagInput, useAction } from '../components/ui.jsx';
+import { Screen, Button, Field, Chips, Segmented, DateField, PickedSummary, SpeciesPicker, TagInput, IdInput, useAction } from '../components/ui.jsx';
 import { EventIcon } from '../components/EventItem.jsx';
 import AnimalPicker from '../components/AnimalPicker.jsx';
 
@@ -152,7 +152,7 @@ export function PurchaseForm() {
     if (m) { const d = parseISO(today()); d.setMonth(d.getMonth() - m); birthDate = toISO(d); }
     const ok = await run(() => recordPurchase({
       species, group, date, seller, totalPrice: total || null,
-      animals: rows.map((r) => ({ tag: r.tag, sex: g?.sex ?? r.sex, group, birthDate, birthApprox: !!birthDate })),
+      animals: rows.map((r) => ({ tag: r.tag, name: r.name || '', sex: g?.sex ?? r.sex, group, birthDate, birthApprox: !!birthDate })),
     }), `Куплено: ${heads(rows.length)}`);
     if (ok) go(`/animals?species=${species}`, { replace: true });
   };
@@ -173,12 +173,14 @@ export function PurchaseForm() {
             <Button icon="plus" onClick={() => setCount(rows.length + 1)} aria-label="Больше" />
           </div>
         </Field>
-        <Field label="Бирки" hint="Можно оставить пустыми и присвоить позже.">
+        <Field label={usesBrand(species) ? 'Клички или номера' : 'Бирки'} hint="Можно оставить пустыми и вписать позже.">
           <div className="list">
             {rows.map((r, i) => (
               <div key={i} className="buy-row">
                 <span className="buy-n">{i + 1}</span>
-                <TagInput id={`buyTag${i}`} value={r.tag} onChange={(v) => setRow(i, { tag: v })} />
+                {usesBrand(species)
+                  ? <IdInput id={`buyName${i}`} value={r.name || ''} onChange={(v) => setRow(i, { name: v })} placeholder="Кличка или номер" />
+                  : <TagInput id={`buyTag${i}`} value={r.tag} onChange={(v) => setRow(i, { tag: v })} />}
                 {g?.sex === null && (
                   <Segmented options={[{ value: 'f', label: sp.babyLabel.f, icon: 'female' }, { value: 'm', label: sp.babyLabel.m, icon: 'male' }]} value={r.sex} onChange={(v) => setRow(i, { sex: v })} />
                 )}
