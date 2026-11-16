@@ -10,6 +10,8 @@ import { Screen, Button, Field, DateField, PickedSummary, IdInput, Segmented, Se
 import Icon from '../components/Icon.jsx';
 import { PickStep, useIdsFromQuery } from './EventForms.jsx';
 import { StorageCard } from './Backup.jsx';
+import { SEASONS, useTheme, setTheme, setAnimation } from '../lib/season.js';
+import { Chips } from '../components/ui.jsx';
 
 const dayWord = (n) => plural(n, 'день', 'дня', 'дней');
 
@@ -262,6 +264,7 @@ export function Settings() {
   const [vals, setVals] = useState(null);
   const run = useAction();
   const [brand, setBrand] = useState(getDefaultBrand());
+  const theme = useTheme();
   const v = vals ?? gestation;
   const changed = SPECIES_LIST.some((s) => Number(v[s.key]) !== gestation[s.key]);
 
@@ -272,6 +275,22 @@ export function Settings() {
 
   return (
     <Screen title="Настройки" backTo="/more" className={changed ? 'with-footer' : ''} footer={changed ? <Button kind="primary" size="lg" block icon="check" onClick={save}>Сохранить</Button> : null}>
+      <Section title="Оформление по сезону">
+        <Chips
+          options={[{ value: 'auto', label: 'Авто' }, ...SEASONS.map((x) => ({ value: x.key, label: x.label }))]}
+          value={theme.theme}
+          onChange={setTheme}
+        />
+        <p className="pill-note">{theme.theme === 'auto' ? `Авто: сейчас ${SEASONS.find((x) => x.key === theme.season).label.toLowerCase()}, тема меняется сама по календарю.` : 'Тема выбрана вручную и не меняется.'}</p>
+        <Field label="Анимация (снег, листья, лепестки)">
+          <Segmented options={[{ value: true, label: 'Включена' }, { value: false, label: 'Выключена' }]} value={theme.animation} onChange={setAnimation} />
+        </Field>
+        <p className="pill-note">
+          {theme.reducedMotion && theme.anim === null ? 'В телефоне включено «уменьшение движения», поэтому анимация выключена. ' : ''}
+          Выключите, чтобы беречь батарею. На экране пересчёта анимации нет никогда.
+        </p>
+      </Section>
+
       <Section title="Срок беременности, дней">
         <p className="muted">По этим числам считается ожидаемая дата родов после покрытия.</p>
         {SPECIES_LIST.map((s) => (

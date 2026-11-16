@@ -14,16 +14,14 @@ import '@fontsource/onest/latin-800.css';
 import './styles.css';
 import App from './App.jsx';
 import { askPersistentStorage, migrate } from './lib/db.js';
-import { applySeason, seasonByDate } from './lib/season.js';
-
-applySeason(seasonByDate());
+import { loadTheme } from './lib/season.js';
 
 // Приложение сохраняется в телефоне и потом открывается без интернета.
 if (!import.meta.env.VITE_NO_SW) registerSW({ immediate: true });
 askPersistentStorage();
 
 // Сначала дописываем новые поля в данные старой версии, потом рисуем экран.
-migrate().catch((e) => console.error('migrate', e)).finally(() => {
+migrate().catch((e) => console.error('migrate', e)).then(loadTheme).finally(() => {
   createRoot(document.getElementById('root')).render(
     <StrictMode>
       <App />

@@ -2,6 +2,8 @@ import { useRoute, go, back } from './lib/router.js';
 import { UiProvider, Empty, Button, Screen } from './components/ui.jsx';
 import Icon from './components/Icon.jsx';
 import Home from './screens/Home.jsx';
+import SeasonFx from './components/SeasonFx.jsx';
+import { useTheme } from './lib/season.js';
 import More from './screens/More.jsx';
 import Animals from './screens/Animals.jsx';
 import AnimalView from './screens/AnimalView.jsx';
@@ -92,11 +94,15 @@ function route(r) {
 export default function App() {
   const r = useRoute();
   const tab = TABS.some((t) => t.path === r.path);
+  const theme = useTheme();
+  // на экране пересчёта анимации нет никогда: ничто не должно отвлекать
+  const fx = theme.animation && r.parts[0] !== 'count';
   return (
     <UiProvider>
       <div className="app">
         <div key={r.key} className="fade-in">{route(r)}</div>
         {tab && <BottomNav path={r.path} />}
+        <SeasonFx season={theme.season} active={fx} />
       </div>
     </UiProvider>
   );
