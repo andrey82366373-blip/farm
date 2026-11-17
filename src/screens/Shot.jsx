@@ -21,8 +21,11 @@ const blank = () => ({ drug: '', kind: 'vaccine', date: today(), dose: '', note:
 const idsOf = (s) => (s || '').split(',').map(Number).filter(Boolean);
 
 function initial(query) {
-  if (query.ids || query.target || query.drug) {
-    return { ...blank(), drug: query.drug || '', dose: query.dose || '', kind: query.kind || 'vaccine', ids: idsOf(query.ids), targetIds: query.target ? idsOf(query.target) : null };
+  if (query.ids || query.target || query.drug || query.species) {
+    return {
+      ...blank(), drug: query.drug || '', dose: query.dose || '', kind: query.kind || 'vaccine', ids: idsOf(query.ids),
+      targetIds: query.target ? idsOf(query.target) : null, species: query.species || null, group: query.group || null, wholeGroup: query.all === '1',
+    };
   }
   const d = loadDraft();
   return d && d.ids?.length ? { ...blank(), ...d, resumed: true } : blank();
@@ -52,6 +55,12 @@ export function ShotForm() {
   const { confirm } = useUi();
 
   useEffect(() => { saveDraft(d.ids.length ? d : null); }, [d]);
+  // голосом «всей группе»: отмечаем всю группу, когда список животных загрузился
+  useEffect(() => {
+    if (!d.wholeGroup || !animals) return;
+    const ids = animals.filter((a) => a.status === 'active' && a.species === d.species && (!d.group || a.group === d.group)).map((a) => a.id);
+    setD((x) => ({ ...x, wholeGroup: false, ids: [...new Set([...x.ids, ...ids])] }));
+  }, [d.wholeGroup, d.species, d.group, animals]);
   const set = (patch) => setD((x) => ({ ...x, ...patch }));
 
   const pool = useMemo(() => (animals || []).filter((a) => a.status === 'active'), [animals]);

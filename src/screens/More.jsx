@@ -3,6 +3,7 @@ import { go } from '../lib/router.js';
 import Icon from '../components/Icon.jsx';
 
 const ITEMS = [
+  { to: '/voice', icon: 'mic', title: 'Голосом', sub: 'Примеры фраз для микрофона' },
   { to: '/calendar', icon: 'calendar', title: 'Календарь', sub: 'Сроки окота и отёла, счётчик дней' },
   { to: '/shots', icon: 'vet', title: 'Уколы и прививки', sub: 'Когда и скольким ставили' },
   { to: '/feed', icon: 'hay', title: 'Корма', sub: 'Запасы, на сколько хватит, сколько докупить' },

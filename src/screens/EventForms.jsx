@@ -61,7 +61,8 @@ export function OutForm({ type }) {
   const [selected, setSelected] = useState(initial);
   const [step, setStep] = useState(initial.size ? 'details' : 'pick');
   const [date, setDate] = useState(today());
-  const [cause, setCause] = useState('disease');
+  const { query } = useRoute();
+  const [cause, setCause] = useState(['cold', 'disease', 'other'].includes(query.cause) ? query.cause : 'disease');
   const [weight, setWeight] = useState('');
   const [note, setNote] = useState('');
   const run = useAction();

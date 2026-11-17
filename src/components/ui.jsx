@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Icon from './Icon.jsx';
-import { back } from '../lib/router.js';
+import { back, useRoute } from '../lib/router.js';
 import { SPECIES, usesBrand, noIdText } from '../lib/domain.js';
 
 /* ---------- Каркас экрана ---------- */
@@ -24,8 +24,24 @@ export function Screen({ title, sub, backTo, right, children, className = '', fo
   return (
     <div className={`screen ${className}`}>
       {title !== undefined && <TopBar title={title} sub={sub} backTo={backTo} right={right} />}
-      <main className="content">{children}</main>
+      <main className="content"><VoiceNote />{children}</main>
       {footer && <div className="footer-bar">{footer}</div>}
+    </div>
+  );
+}
+
+// Полоса над формой, открытой голосом: напоминает, что ещё ничего не записано.
+function VoiceNote() {
+  const { query } = useRoute();
+  if (!query.voice) return null;
+  return (
+    <div className="banner voice-note" role="status">
+      <Icon name="mic" />
+      <div className="banner-body">
+        <div className="banner-title">Заполнено голосом</div>
+        <p>«{query.voice}»</p>
+        <p>Проверьте всё ниже и нажмите «Сохранить» или «Записать». Пока ничего не записано.</p>
+      </div>
     </div>
   );
 }

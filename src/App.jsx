@@ -17,6 +17,7 @@ import { Calendar, MatingForm, Settings } from './screens/Calendar.jsx';
 import { Feed, FeedEdit } from './screens/Feed.jsx';
 import { Finance, MoneyEntry, Plan } from './screens/Finance.jsx';
 import { Fuel, FuelEntry } from './screens/Fuel.jsx';
+import { VoiceExamples } from './components/Voice.jsx';
 import { CountSetup, CountRun, CountResult, CountView, Counts } from './screens/Count.jsx';
 import { EventChooser, OutForm, PurchaseForm } from './screens/EventForms.jsx';
 import { ShotForm, Shots } from './screens/Shot.jsx';
@@ -71,6 +72,7 @@ function route(r) {
     case 'shots': return <Shots />;
     case 'calendar': return <Calendar />;
     case 'finance': return <Finance />;
+    case 'voice': return <Screen title="Голосом" sub="Примеры фраз" backTo="/more"><p>Нажмите микрофон на главном экране и скажите одну из таких фраз. Числа можно говорить словами. Приложение заполнит форму, а записать её нужно самому кнопкой «Сохранить». Для голоса нужен интернет.</p><VoiceExamples /></Screen>;
     case 'fuel': return b === 'new' ? <FuelEntry /> : b ? <FuelEntry id={Number(b)} /> : <Fuel />;
     case 'plan': return <Plan />;
     case 'money': return b === 'new' ? <MoneyEntry /> : <MoneyEntry id={Number(b)} />;

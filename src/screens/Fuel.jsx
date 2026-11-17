@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, setSetting } from '../lib/db.js';
 import { today, fmtDate, fmtRub, fmtNum, fmtMonth, parseNum, plural, MONTHS_SHORT, MONTHS_NOM } from '../lib/format.js';
 import { monthRange, shiftMonth, yearMonths } from '../lib/stats.js';
-import { go, back, useKeep } from '../lib/router.js';
+import { go, back, useKeep, useRoute } from '../lib/router.js';
 import { Screen, Button, Field, Chips, Segmented, DateField, Section, Empty, Sheet, useUi, useAction } from '../components/ui.jsx';
 import BarChart from '../components/BarChart.jsx';
 import Icon from '../components/Icon.jsx';
@@ -183,6 +183,7 @@ function VehiclesSheet({ onClose }) {
 
 /* ---------- Заправка: новая запись и изменение ---------- */
 export function FuelEntry({ id }) {
+  const { query } = useRoute();
   const existing = useLiveQuery(() => (id ? db.finance.get(id) : null), [id]);
   const past = useLiveQuery(() => db.finance.where('category').equals('fuel').toArray(), []);
   const vehicles = useVehicles();
@@ -205,8 +206,16 @@ export function FuelEntry({ id }) {
       if (!existing) return;
       setF({ type: existing.fuel?.type || FUEL_TYPES[0], liters: str(existing.fuel?.liters), price: str(existing.fuel?.price), sum: str(existing.amount), vehicle: existing.fuel?.vehicle || '', date: existing.date, note: existing.fuel?.note || '', edited: 'liters' });
     } else {
-      const type = lastOf.type || FUEL_TYPES[0];
-      setF({ type, liters: '', price: str(lastOf.price[type]), sum: '', vehicle: lastOf.vehicle || vehicles[0], date: today(), note: '', edited: 'liters' });
+      const type = FUEL_TYPES.includes(query.type) ? query.type : lastOf.type || FUEL_TYPES[0];
+      const price = lastOf.price[type] || 0;
+      // голосом: «на три тысячи», «сорок литров»
+      const L = parseNum(query.liters), S = parseNum(query.sum);
+      setF({
+        type, price: str(price),
+        liters: L ? str(L) : S && price ? str(S / price) : '',
+        sum: S ? str(S) : L && price ? str(L * price) : '',
+        vehicle: query.vehicle || lastOf.vehicle || vehicles[0], date: today(), note: '', edited: S ? 'sum' : 'liters',
+      });
     }
   }, [f, past, existing, id, lastOf, vehicles]);
   if (!f) return <Screen title="Заправка" />;

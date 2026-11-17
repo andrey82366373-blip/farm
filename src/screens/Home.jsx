@@ -14,6 +14,7 @@ import { setSetting } from '../lib/db.js';
 import { useUi } from '../components/ui.jsx';
 import { shotReminders } from '../lib/shots.js';
 import { useWeatherData, FrostAlert, WeatherWidget } from '../components/Weather.jsx';
+import { VoiceSheet } from '../components/Voice.jsx';
 import { useGestation, useMatingEvents, pregnancies, dueGroups, dueLabel } from '../lib/repro.js';
 import { useFeedUntil, headcount, feedCalc, fmtUnits } from '../lib/feed.js';
 
@@ -25,6 +26,7 @@ export default function Home() {
   const { notify } = useUi();
   const weatherData = useWeatherData();
   const [q, setQ] = useState('');
+  const [voice, setVoice] = useState(false);
   const [mat, setMat] = useState(null);
 
   const sum = useMemo(() => herdSummary(animals), [animals]);
@@ -93,7 +95,10 @@ export default function Home() {
       <div className="hero">
         <div className="hero-date">{fmtDateLong(today())}</div>
         <h1>Моё хозяйство</h1>
-        <SearchBox value={q} onChange={setQ} onEnter={() => found.length === 1 && go(`/animal/${found[0].id}`)} />
+        <div className="search-row">
+          <SearchBox value={q} onChange={setQ} onEnter={() => found.length === 1 && go(`/animal/${found[0].id}`)} />
+          <button className="mic-btn press" onClick={() => setVoice(true)} aria-label="Сказать голосом"><Icon name="mic" /></button>
+        </div>
       </div>
 
       <main className="content">
@@ -197,6 +202,7 @@ export default function Home() {
           </Section>
         )}
       </main>
+      {voice && <VoiceSheet onClose={() => setVoice(false)} />}
       {mat && <MaturitySheet group={matGroups.find((g) => g.key === mat.key) ?? null} onClose={() => setMat(null)} />}
     </div>
   );

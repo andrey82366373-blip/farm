@@ -16,7 +16,11 @@ export default function Birth() {
   const [motherTag, setMotherTag] = useState(query.mother || '');
   const [mother, setMother] = useState(null);
   const [date, setDate] = useState(today());
-  const [babies, setBabies] = useState([newBaby()]);
+  const [babies, setBabies] = useState(() => {
+    // голосом: «двойня», «тройня», «бычок»
+    const n = Math.max(1, Math.min(6, Number(query.n) || 1));
+    return Array.from({ length: n }, () => newBaby(query.sex === 'm' ? 'm' : 'f'));
+  });
   const [dupes, setDupes] = useState({});
   const [saving, setSaving] = useState(false);
   const run = useAction();
