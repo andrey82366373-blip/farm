@@ -13,6 +13,7 @@ import { backupDue, shareOrDownload } from '../lib/backup.js';
 import { setSetting } from '../lib/db.js';
 import { useUi } from '../components/ui.jsx';
 import { shotReminders } from '../lib/shots.js';
+import { useWeatherData, FrostAlert, WeatherWidget } from '../components/Weather.jsx';
 import { useGestation, useMatingEvents, pregnancies, dueGroups, dueLabel } from '../lib/repro.js';
 import { useFeedUntil, headcount, feedCalc, fmtUnits } from '../lib/feed.js';
 
@@ -22,6 +23,7 @@ export default function Home() {
   const hasDemo = useLiveQuery(() => db.animals.where('demo').equals(1).count(), []);
   const snooze = useLiveQuery(() => db.settings.get('backupSnoozeUntil').then((r) => r?.value ?? 0), []);
   const { notify } = useUi();
+  const weatherData = useWeatherData();
   const [q, setQ] = useState('');
   const [mat, setMat] = useState(null);
 
@@ -104,6 +106,8 @@ export default function Home() {
           </Section>
         )}
 
+        <FrostAlert data={weatherData} />
+
         {needBackup && (
           <div className="banner banner-backup" role="alert">
             <Icon name="shield" />
@@ -137,6 +141,7 @@ export default function Home() {
           </div>
         ) : (
           <>
+            <WeatherWidget data={weatherData} />
             <div className="total-line"><span>На хозяйстве сейчас</span><b>{heads(sum.total)}</b></div>
             <div className="list">
               {SPECIES_LIST.map((s) => {

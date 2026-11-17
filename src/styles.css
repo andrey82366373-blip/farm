@@ -750,3 +750,29 @@ body { transition: background-color .4s; }
 html[data-season="winter"] .hero::after { filter: drop-shadow(0 -2px 0 #fff); }
 html[data-season="winter"] .topbar { box-shadow: inset 0 5px 0 #fff; }
 .plan-line b, .fc-row b { white-space: nowrap; }
+
+/* ---------- Погода ---------- */
+.weather { display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 12px; }
+.weather-empty { flex-direction: row; align-items: center; gap: 14px; }
+.weather-empty > .icon { width: 36px; height: 36px; color: var(--ink-2); }
+.weather .icon-btn { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; border: var(--bw) solid var(--ink); flex: none; }
+.weather-days { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.wday { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; border-radius: 16px; background: var(--meadow); text-align: center; }
+.wday-name { font-size: 16px; font-weight: 700; }
+.wday .icon { width: 34px; height: 34px; color: var(--ink-2); }
+.wday b { font-size: 26px; font-weight: 800; line-height: 1; }
+.wday-night { font-size: 15px; color: var(--ink-2); }
+.wday.cold { background: #DCEBFA; box-shadow: inset 0 0 0 2px #2B5D8C; }
+.wday.cold .wday-night { color: #1B3F63; font-weight: 800; }
+.weather-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 15px; color: var(--ink-2); }
+.weather-foot .link { font-size: 16px; }
+.frost { background: #DCEBFA; border-color: #1B3F63; flex-direction: column; gap: 10px; }
+.frost > .icon { width: 44px; height: 44px; color: #1B3F63; }
+.frost .banner-title { font-size: 25px; color: #12324F; }
+.frost-season { background: var(--red); border-color: var(--ink); color: #fff; }
+.frost-season > .icon, .frost-season .banner-title { color: #fff; }
+.frost-season .pill-note { color: #FFE3DE; }
+.frost-nights { display: flex; flex-wrap: wrap; gap: 8px; }
+.frost-night { display: flex; flex-direction: column; padding: 8px 14px; border-radius: 14px; background: rgba(255,255,255,.75); color: var(--ink); }
+.frost-night span { font-size: 15px; font-weight: 600; }
+.frost-night b { font-size: 30px; font-weight: 800; line-height: 1.05; }

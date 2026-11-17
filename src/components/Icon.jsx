@@ -79,6 +79,14 @@ const ICONS = {
   settings: <svg viewBox="0 0 24 24"><g {...S}><path d="M4 7h10M18 7h2M4 17h4M12 17h8" /><circle cx="16" cy="7" r="2.2" /><circle cx="10" cy="17" r="2.2" /></g></svg>,
   clock: <svg viewBox="0 0 24 24"><g {...S}><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></g></svg>,
   fuel: <svg viewBox="0 0 24 24"><g {...S}><path d="M4 20.5V5.5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v15M3 20.5h12M6.5 7.5h5v4h-5Z" /><path d="M14 11h2a1.5 1.5 0 0 1 1.5 1.5v4a1.5 1.5 0 0 0 3 0V9l-2.5-2.5" /></g></svg>,
+  sun: <svg viewBox="0 0 24 24"><g {...S}><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2.3M12 19.2v2.3M2.5 12h2.3M19.2 12h2.3M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" /></g></svg>,
+  sunCloud: <svg viewBox="0 0 24 24"><g {...S}><path d="M8.5 3v1.6M3.6 8H5.2M4.9 4.4l1.1 1.1M12.1 4.4 11 5.5" /><path d="M6 10.4a3.4 3.4 0 0 1 6-1.6" /><path d="M7.5 19.5h10a3.5 3.5 0 0 0 .4-7 5 5 0 0 0-9.6 1.2A2.9 2.9 0 0 0 7.5 19.5Z" /></g></svg>,
+  cloud: <svg viewBox="0 0 24 24"><path {...S} d="M7 19h10.5a4 4 0 0 0 .5-8 5.5 5.5 0 0 0-10.7 1.3A3.4 3.4 0 0 0 7 19Z" /></svg>,
+  rain: <svg viewBox="0 0 24 24"><g {...S}><path d="M7 15h10.5a3.6 3.6 0 0 0 .4-7.2 5.2 5.2 0 0 0-10.1 1.2A3 3 0 0 0 7 15Z" /><path d="M8.5 18l-1 2.5M12.5 18l-1 2.5M16.5 18l-1 2.5" /></g></svg>,
+  snow: <svg viewBox="0 0 24 24"><g {...S}><path d="M12 2.5v19M3.8 7.25l16.4 9.5M3.8 16.75l16.4-9.5" /><path d="M9.5 3.8 12 6l2.5-2.2M9.5 20.2 12 18l2.5 2.2M4.6 10.4l3.2-.4-1.2-3M19.4 13.6l-3.2.4 1.2 3M4.6 13.6l3.2.4-1.2 3M19.4 10.4l-3.2-.4 1.2-3" /></g></svg>,
+  mic: <svg viewBox="0 0 24 24"><g {...S}><rect x="9" y="2.5" width="6" height="11.5" rx="3" /><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5v4M8.5 21.5h7" /></g></svg>,
+  report: <svg viewBox="0 0 24 24"><g {...S}><path d="M6 2.5h8.5L19 7v14.5H6Z" /><path d="M14 2.5V7h5M9 12h7M9 15.5h7M9 19h4" /></g></svg>,
+  table: <svg viewBox="0 0 24 24"><g {...S}><rect x="3.5" y="4" width="17" height="16" rx="2" /><path d="M3.5 9h17M3.5 14.5h17M9.5 9v11" /></g></svg>,
   male: <svg viewBox="0 0 24 24"><g {...S}><circle cx="10" cy="14" r="5" /><path d="M13.5 10.5 20 4M15 4h5v5" /></g></svg>,
 };
 

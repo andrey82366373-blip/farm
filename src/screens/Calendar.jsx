@@ -11,6 +11,8 @@ import Icon from '../components/Icon.jsx';
 import { PickStep, useIdsFromQuery } from './EventForms.jsx';
 import { StorageCard } from './Backup.jsx';
 import { SEASONS, useTheme, setTheme, setAnimation } from '../lib/season.js';
+import { WEATHER_DEFAULT, saveWeatherSettings } from '../lib/weather.js';
+import { parseNum } from '../lib/format.js';
 import { Chips } from '../components/ui.jsx';
 
 const dayWord = (n) => plural(n, 'день', 'дня', 'дней');
@@ -303,6 +305,8 @@ export function Settings() {
         ))}
         <Button kind="ghost" onClick={() => setVals({ ...GESTATION_DEFAULT })}>Вернуть обычные сроки</Button>
       </Section>
+      <WeatherSettings />
+
       <Section title="Хранение данных">
         <StorageCard />
         <Button icon="shield" block onClick={() => go('/backup')}>Резервная копия</Button>
@@ -313,5 +317,38 @@ export function Settings() {
         </Field>
       </Section>
     </Screen>
+  );
+}
+
+/* ---------- Погода и мороз ---------- */
+function WeatherSettings() {
+  const saved = useLiveQuery(() => db.settings.get('weatherSettings').then((r) => ({ ...WEATHER_DEFAULT, ...(r?.value || {}) })), []);
+  const [v, setV] = useState(null);
+  const run = useAction();
+  if (!saved) return null;
+  const cur = v ?? { ...saved, lat: String(saved.lat).replace('.', ','), lon: String(saved.lon).replace('.', ','), frost: String(saved.frost), frostSeason: String(saved.frostSeason) };
+  const set = (p) => setV({ ...cur, ...p });
+  const lat = parseNum(cur.lat), lon = parseNum(cur.lon), fr = parseNum(cur.frost), frs = parseNum(cur.frostSeason);
+  const bad = lat === null || lon === null || lat < -90 || lat > 90 || lon < -180 || lon > 180 || fr === null || frs === null;
+  const save = async () => {
+    if (await run(() => saveWeatherSettings({ place: cur.place.trim() || 'Хозяйство', lat, lon, frost: fr, frostSeason: frs }), 'Настройки погоды сохранены')) setV(null);
+  };
+  const minus = (s) => s.replace(/[^0-9,.−-]/g, '').replace('−', '-');
+  return (
+    <Section title="Погода и мороз">
+      <p className="muted">Прогноз берётся с сайта Open-Meteo, когда есть интернет. Без интернета показывается последний сохранённый.</p>
+      <Field label="Место" htmlFor="wPlace"><input id="wPlace" className="input" value={cur.place} onChange={(e) => set({ place: e.target.value })} /></Field>
+      <div className="input-row">
+        <Field label="Широта" htmlFor="wLat"><input id="wLat" className="input" inputMode="decimal" value={cur.lat} onChange={(e) => set({ lat: e.target.value })} /></Field>
+        <Field label="Долгота" htmlFor="wLon"><input id="wLon" className="input" inputMode="decimal" value={cur.lon} onChange={(e) => set({ lon: e.target.value })} /></Field>
+      </div>
+      <p className="pill-note">Координаты можно взять в картах: нажмите на своё место и скопируйте два числа. Абакан: 53,72 и 91,43.</p>
+      <div className="input-row">
+        <Field label="Мороз, обычно" htmlFor="wFrost" hint="Предупреждать, если ночью холоднее."><div className="input-unit"><input id="wFrost" className="input" inputMode="text" value={cur.frost} onChange={(e) => set({ frost: minus(e.target.value) })} /><span>°C</span></div></Field>
+        <Field label="Во время окота" htmlFor="wFrostS" hint="И отёла. Обычно мягче."><div className="input-unit"><input id="wFrostS" className="input" inputMode="text" value={cur.frostSeason} onChange={(e) => set({ frostSeason: minus(e.target.value) })} /><span>°C</span></div></Field>
+      </div>
+      {v && <Button kind="primary" icon="check" block disabled={bad} onClick={save}>Сохранить погоду</Button>}
+      {v && bad && <div className="field-error">Проверьте числа: широта от −90 до 90, долгота от −180 до 180, пороги со знаком минус.</div>}
+    </Section>
   );
 }
